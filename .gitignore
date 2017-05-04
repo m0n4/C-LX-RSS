@@ -1,0 +1,8 @@
+backup/
+cache/
+config/
+databases/
+error.log
+.htaccess
+TODO
+MAJ.log
