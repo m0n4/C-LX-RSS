@@ -1,5 +1,5 @@
 backup/
-cache/
+cache/favicons/*
 config/
 databases/
 error.log

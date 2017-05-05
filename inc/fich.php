@@ -109,10 +109,12 @@ function fichier_mysql($sgdb) {
 	if ($sgdb !== FALSE) {
 		$data .= '; <?php die(); /*'."\n\n";
 		$data .= '; This file contains MySQL credentials and configuration.'."\n\n";
-		$data .= 'MYSQL_LOGIN = \''.htmlentities($_POST['mysql_user'], ENT_QUOTES).'\''."\n";
-		$data .= 'MYSQL_PASS = \''.htmlentities($_POST['mysql_passwd'], ENT_QUOTES).'\''."\n";
-		$data .= 'MYSQL_DB = \''.htmlentities($_POST['mysql_db'], ENT_QUOTES).'\''."\n";
-		$data .= 'MYSQL_HOST = \''.htmlentities($_POST['mysql_host'], ENT_QUOTES).'\''."\n\n";
+		if (extension_loaded('pdo_mysql') ) {
+			$data .= 'MYSQL_LOGIN = \''.htmlentities($_POST['mysql_user'], ENT_QUOTES).'\''."\n";
+			$data .= 'MYSQL_PASS = \''.htmlentities($_POST['mysql_passwd'], ENT_QUOTES).'\''."\n";
+			$data .= 'MYSQL_DB = \''.htmlentities($_POST['mysql_db'], ENT_QUOTES).'\''."\n";
+			$data .= 'MYSQL_HOST = \''.htmlentities($_POST['mysql_host'], ENT_QUOTES).'\''."\n\n";
+		}
 		$data .= 'DBMS = \''.$sgdb.'\''."\n";
 	}
 

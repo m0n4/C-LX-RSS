@@ -6,17 +6,19 @@ This is C-LX RSS Reader, a SQLite based RSS aggregator, by Timo van Neerden, sin
 
 C-LX is originally based on [Blogotexts](https://github.com/BoboTiG/blogotext/) RSS reader.
 
+![alt tag](screenshot.png?raw=true)
+
 ---
 
 ## Features
 
- * RSS Reader
+C-LX RSS is juste another, single user, web-based, RSS Reader. It comes with OPML and CronJobs support.
 
 ---
 
 ## Installation
  * Unzip the downloaded archive file
- * Upload folder to your site (eg: to `http://example.com/rss`)
+ * Upload folder to your site (eg: to `http://example.com/feed-reader/`)
  * Use your browser to go to your site
  * Follow the few steps
 
