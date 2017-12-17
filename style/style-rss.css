@@ -10,47 +10,8 @@
 }
 
 /* the top menu of the list */
-#sub-menu {
-	min-height: 44px;
-	display: flex;
-	align-items: center;
-	padding: 0 30px;
-	background: #fefefe;
-	color: #333;
-}
-
-#sub-menu #count-posts {
-	display: flex;
-	align-items: center;
-}
-
-#sub-menu #counter {
-	margin: 0 8px;
-	display: none;
-	height: 15px;
-	width: 15px;
-	border: 3px solid rgba(0, 0, 0, .1);
-	border-top-color: rgba(0, 0, 0, .5);
-	border-radius: 50%;
-	animation: spinnerLoading 0.6s infinite linear;
-}
-
-#sub-menu #message-return {
-	display: block;
-	margin: 10px auto;
-	flex: 1;
-}
-
-
 .rss-menu-buttons {
-	margin: 2px 0;
-	padding: 0;
-	flex: 1;
 	text-align: right;
-}
-
-.rss-menu-buttons > li {
-	display: inline-block;
 }
 
 .rss-menu-buttons button {
@@ -64,23 +25,10 @@
 	color: rgba(0, 0, 0, .6);
 }
 
-.rss-menu-buttons button::before {
-	font-size: 1.6em;
-}
-
-.rss-menu-buttons li > button:focus,
-.rss-menu-buttons li > button::-moz-focus-inner {
-	background-color: rgba(0, 0, 0, .05);
-	transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s;
-   outline: none;
-	border-color: transparent;
-}
-
-
-#sub-menu ul.rss-menu-buttons > li:nth-of-type(1) > button::before { content: "\e92e"; }
-#sub-menu ul.rss-menu-buttons > li:nth-of-type(2) > button::before { content: "\e92f"; }
-#sub-menu ul.rss-menu-buttons > li:nth-of-type(3) > button::before { content: "\e938"; }
-#sub-menu ul.rss-menu-buttons > li:nth-of-type(4) > button::before { content: "\e90f"; }
+#sub-menu .rss-menu-buttons > li:nth-of-type(1) > button::before { content: "\e92e"; }
+#sub-menu .rss-menu-buttons > li:nth-of-type(2) > button::before { content: "\e92f"; }
+#sub-menu .rss-menu-buttons > li:nth-of-type(3) > button::before { content: "\e938"; }
+#sub-menu .rss-menu-buttons > li:nth-of-type(4) > button::before { content: "\e90f"; }
 #sub-menu #count-posts > button { background-image: none; }
 
 /* bloc with feed lists (sites) + feed posts (the actually posts) */
@@ -426,74 +374,51 @@
 
 
 /* RSS Config Page -------------------- */
-#form-rss-config,
-#form-rss-add {
-	margin-bottom: 30px;
+#form-rss-config {
+	margin: 30px 0;
 }
 
-#form-rss-config ul {
-	padding: 0;
-	margin: 0;
-	list-style: none;
+#form-rss-config > .feed-item {
+	margin: 0 12px 25px;
+	display: inline-block;
+	width: 300px;
 }
 
-#form-rss-config li {
-	display: flex;
-	margin-bottom: 25px;
-	text-align: left;
-	line-height: 1.6em;
-}
-
-#form-rss-config li span {
-	display: flex;
-}
-
-#form-rss-config li span.feed-error {
+#form-rss-config .feed-error {
 	color: red;
 }
 
-#form-rss-config li span:first-of-type { /* name */
-	flex: 1;
+#form-rss-config p {
+	margin: 0;
+	display: flex;
 }
-#form-rss-config li span:first-of-type input { /* name */
+
+#form-rss-config p:first-of-type input { /* name */
 	font-weight: bold;
 	-moz-appearance: none;
 }
 
-#form-rss-config li span:nth-of-type(2) {
-	flex: 0 0 20%;
-}
-#form-rss-config li span:nth-of-type(2) input { /* url */
+#form-rss-config p:nth-of-type(2) input { /* url */
 	text-overflow: ellipsis;
 }
-#form-rss-config li span:nth-of-type(3) { /* folder */
-	flex: 0 0 20%;
+
+#form-rss-config p:last-of-type { /* buttons */
+	margin-top: 15px;
+	justify-content: flex-end;
 }
 
-#form-rss-config li span:nth-of-type(4) { /* suppr+annuler buttons */
-	flex: 0 0 auto;
-}
-
-#form-rss-config li .button-cancel {
+#form-rss-config .button-cancel {
 	display: none;
 }
 
-#form-rss-add label {
-	text-align: right;
-	display: inline-block;
-	height: 24px;
-}
-
-#form-rss-config li label,
-#form-rss-add label {
+#form-rss-config label {
+	flex: 0 0 24px;
 	height: 38px;
-	width: 24px;
 	overflow: hidden;
 	line-height: 38px;
 }
 
-#form-rss-config li label::before,
-#form-rss-add label::before {
+#form-rss-config label::before {
 	content: "\e901";
 	font-size: 1.3em;
 	color: rgba(0, 0, 0, .5);
@@ -503,18 +428,12 @@
 #form-rss-config label[for^="j_"]::before { content: "\e926"; }
 #form-rss-config label[for^="l_"]::before { content: "\e91a"; }
 
-#form-rss-config li input.text,
-#form-rss-add input.text {
-	text-align: left;
-	width: 60%;
-}
-
-#form-rss-config li input.text {
-	width: 100%;
+#form-rss-config input.text {
+	flex: 1;
 	border-bottom-color: transparent;
 }
 
-#form-rss-config li button.button-delete {
+#form-rss-config button.button-delete {
 	margin-left: 10px;
 	margin-top: 0;
 	vertical-align: middle;
@@ -522,25 +441,24 @@
 	color: #f44336;
 	box-shadow: none;
 }
-#form-rss-config li button.button-delete:hover {
-	border: 1px solid #ddd;
+#form-rss-config button.button-delete:hover {
 	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
-#form-rss-config li button.button-delete:active {
+#form-rss-config button.button-delete:active {
 	box-shadow: none;
 }
 
-#form-rss-config li.to-remove > p {
-	text-decoration: line-through;
+#form-rss-config .to-remove {
+	background-color: rgb(250, 250, 250);
 }
 
-#form-rss-config li.to-remove .button-cancel {
+#form-rss-config .to-remove > p .button-cancel {
 	display: inline;
+	text-decoration: none;
 }
 
-#form-rss-config li.to-remove label,
-#form-rss-config li.to-remove input,
-#form-rss-config li.to-remove .button-delete {
+#form-rss-config .to-remove label,
+#form-rss-config .to-remove input,
+#form-rss-config .to-remove .button-delete {
 	opacity: .2;
-	
 }

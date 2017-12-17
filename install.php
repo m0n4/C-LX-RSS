@@ -1,10 +1,17 @@
 <?php
-// *** LICENSE ***
-//
-// This file is part of C60.
-// Since 2016, by Timo Van Neerden.
-// C60 is free software, under MIT/X11 Licence.
+# *** LICENSE ***
+# This file is part of BlogoText.
+# http://lehollandaisvolant.net/blogotext/
+#
+# 2006      Frederic Nassar.
+# 2010-2016 Timo Van Neerden.
+#
+# BlogoText is free software.
+# You can redistribute it under the terms of the MIT / X11 Licence.
+#
+# *** LICENSE ***
 
+define('IS_IT_INSTALL', true);
 
 // install or reinstall with same config ?
 if ( file_exists('config/mysql.ini') and file_get_contents('config/mysql.ini') == '' ) {
@@ -34,7 +41,9 @@ if (isset($_GET['l'])) {
 
 }
 
-require_once 'inc/inc.php';
+$GLOBALS['racine'] = str_replace('install.php', '', 'http://'.$_SERVER['SERVER_NAME'].$_SERVER['SCRIPT_NAME']);
+
+require_once 'inc/boot.php';
 
 if (isset($_GET['s']) and is_numeric($_GET['s'])) {
 	$GLOBALS['step'] = $_GET['s'];
@@ -63,6 +72,7 @@ elseif ($GLOBALS['step'] == '2') {
 		} else {
 			creer_dossier(DIR_CONFIG, 1);
 			creer_dossier(DIR_DATABASES, 1);
+			creer_dossier(DIR_VAR, 1);
 			fichier_user();
 			import_ini_file(DIR_CONFIG.'user.ini');
 
@@ -154,7 +164,7 @@ function afficher_form_2($erreurs='') {
 	echo '<p>';
 	echo '<label for="mdp">'.$GLOBALS['lang']['install_mdp'].' </label><input type="password" name="mdp" id="mdp" size="30" value="" class="text" autocomplete="off" placeholder="••••••••••••" required /><button type="button" class="unveilmdp" onclick="return revealpass(\'mdp\');"></button>'."\n";
 	echo '</p>'."\n";
-	$lien = str_replace('/install.php', '/', 'http://'.$_SERVER['SERVER_NAME'].$_SERVER['SCRIPT_NAME']);
+	$lien = str_replace('install.php', '', 'http://'.$_SERVER['SERVER_NAME'].$_SERVER['SCRIPT_NAME']);
 	echo '<p>';
 	echo '<label for="racine">'.$GLOBALS['lang']['pref_racine'].' </label><input type="text" name="racine" id="racine" size="30" value="'.$lien.'" class="text"  placeholder="'.$lien.'" required />'."\n";
 	echo '</p>'."\n";

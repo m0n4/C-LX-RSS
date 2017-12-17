@@ -15,11 +15,25 @@ if (!isset($_GET['w'], $_GET['q'])) {
 	header("HTTP/1.0 400 Bad Request"); exit;
 }
 
+
+function creer_dossier($dossier) {
+	if ( !is_dir($dossier) ) {
+		if (mkdir($dossier, 0777, true) === TRUE) {
+			return TRUE;
+		} else {
+			return FALSE;
+		}
+	}
+	return TRUE; // si le dossier existe déjà.
+}
+
 $expire = time() -60*60*24*7*365 ;  // default: 1 year
 
 if ($_GET['w'] == 'favicon') {
 	// target dir
-	$target_dir = 'favicons';
+	creer_dossier('var/cache/favicons/');
+	$target_dir = 'var/cache/favicons';
+
 	// source file
 	$domain = parse_url($_GET['q'], PHP_URL_HOST); // full URL given?
 	if ($domain === NULL) { $domain = parse_url($_GET['q'], PHP_URL_PATH); } // or only domain name?
@@ -33,7 +47,9 @@ if ($_GET['w'] == 'favicon') {
 
 elseif ($_GET['w'] == 'gravatar') {
 	// target dir
-	$target_dir = 'gravatar';
+	creer_dossier('var/cache/gravatar/');
+
+	$target_dir = 'var/cache/gravatar/';
 	// source file
 	if (strlen($_GET['q']) !== 32) { header("HTTP/1.0 400 Bad Request"); exit; }  // g is 32 character long ? if no, die.
 	$hash = preg_replace("[^a-f0-9]", "", $_GET['q'] );  // strip out anything that doesn't belong in a md5 hash

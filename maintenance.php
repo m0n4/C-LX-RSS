@@ -11,25 +11,10 @@
 #
 # *** LICENSE ***
 
-require_once 'inc/inc.php';
+require_once 'inc/boot.php';
 operate_session();
-
 $GLOBALS['liste_flux'] = open_serialzd_file(FEEDS_DB);
-$GLOBALS['db_handle'] = open_base();
 
-afficher_html_head($GLOBALS['lang']['titre_maintenance']);
-echo '<div id="header">'."\n";
-	echo '<div id="top">'."\n";
-	afficher_msg();
-	afficher_topnav('preferences.php', $GLOBALS['lang']['titre_maintenance']);
-	echo '</div>'."\n";
-echo '</div>'."\n";
-
-echo '<div id="axe">'."\n";
-echo '<div id="page">'."\n";
-
-// création du dossier des backups
-creer_dossier(DIR_BACKUP, 0);
 
 /* AJOUTE TOUS LES DOSSIERS DU TABLEAU $dossiers DANS UNE ARCHIVE ZIP */
 function addFolder2zip($zip, $folder) {
@@ -44,21 +29,25 @@ function addFolder2zip($zip, $folder) {
 }
 
 function creer_fichier_zip($dossiers) {
-	$zipfile = DIR_BACKUP.'archive_site-'.date('Ymd').'-'.substr(md5(rand(10,99)),3,5).'.zip'; // TODO : path is absolute → make is relative
+	foreach($dossiers as $i => $dossier) {
+		$dossiers[$i] = '../'.str_replace(BT_ROOT, '', $dossier); // FIXME : find cleaner way for '../';
+	}
+	$file = 'archive_site-'.date('Ymd').'-'.substr(md5(rand(10,99)),3,5).'.zip';
+	$filepath = str_replace(realpath($_SERVER['DOCUMENT_ROOT']), '', dirname(__DIR__)).'/'.str_replace(BT_ROOT, '', DIR_BACKUP).$file;
+
 	$zip = new ZipArchive;
-	if ($zip->open($zipfile, ZipArchive::CREATE) === TRUE) {
+	if ($zip->open(DIR_BACKUP.$file, ZipArchive::CREATE) === TRUE) {
 		foreach ($dossiers as $dossier) {
 			addFolder2zip($zip, $dossier);
 		}
 		$zip->close();
-		if (is_file($zipfile)) return $zipfile;
+		if (is_file(DIR_BACKUP.$file)) return $filepath;
 	}
 	else return FALSE;
 }
 
 /* Crée la liste des RSS et met tout ça dans un fichier OPML */
 function creer_fichier_opml() {
-	$path = DIR_BACKUP.'backup-data-'.date('Ymd-His').'.opml';
 	// sort feeds by folder
 	$folders = array();
 	foreach ($GLOBALS['liste_flux'] as $i => $feed) {
@@ -72,7 +61,6 @@ function creer_fichier_opml() {
 	$html .= "\t\t".'<title>Newsfeeds '.BLOGOTEXT_NAME.' '.BLOGOTEXT_VERSION.' on '.date('Y/m/d').'</title>'."\n";
 	$html .= "\t".'</head>'."\n";
 	$html .= "\t".'<body>'."\n";
-
 	function esc($a) {
 		return htmlspecialchars($a, ENT_QUOTES, 'UTF-8');
 	}
@@ -93,7 +81,11 @@ function creer_fichier_opml() {
 
 	$html .= "\t".'</body>'."\n".'</opml>';
 
-	return (file_put_contents($path, $html) === FALSE) ? FALSE : $path;
+	// écriture du fichier
+	$file = 'backup-data-'.date('Ymd-His').'.opml';
+	$filepath = str_replace(realpath($_SERVER['DOCUMENT_ROOT']), '', dirname(__DIR__)).'/'.str_replace(BT_ROOT, '', DIR_BACKUP).$file;
+	return (file_put_contents(DIR_BACKUP.$file, $html) === FALSE) ? FALSE : $filepath;
+
 }
 
 // Parse et importe un fichier de liste de flux OPML
@@ -132,8 +124,19 @@ function importer_opml($opml_content) {
 }
 
 
+// DEBUT PAGE
+afficher_html_head($GLOBALS['lang']['titre_maintenance']);
+afficher_topnav($GLOBALS['lang']['titre_maintenance'], ''); #top
+
+echo '<div id="axe">'."\n";
+echo '<div id="page">'."\n";
+
+// création du dossier des backups
+creer_dossier(DIR_BACKUP, 0);
+
+
 /*
- * Affiches les formulaires qui demandent quoi faire. (!isset($do))
+ * Affiches les formulaires qui demandent quoi faire.
  * Font le traitement dans les autres cas.
 */
 
@@ -158,20 +161,21 @@ if (!isset($_GET['do']) and !isset($_FILES['file'])) {
 	// choose export what ?
 		echo '<fieldset>'."\n";
 		echo '<legend class="legend-backup">'.$GLOBALS['lang']['maintenance_export'].'</legend>';
-		echo "\t".'<p><label for="zip">'.$GLOBALS['lang']['bak_export_zip'].'</label>'.
-			'<input type="radio" name="exp-format" value="zip"  id="zip"  onchange="switch_export_type(\'e_zip\')"  /></p>'."\n";
 		echo "\t".'<p><label for="opml">'.$GLOBALS['lang']['bak_export_opml'].'</label>'.
 			'<input type="radio" name="exp-format" value="opml"  id="opml"  onchange="switch_export_type(\'e_opml\')"  /></p>'."\n";
+		echo "\t".'<p><label for="zip">'.$GLOBALS['lang']['bak_export_zip'].'</label>'.
+			'<input type="radio" name="exp-format" value="zip"  id="zip"  onchange="switch_export_type(\'e_zip\')"  /></p>'."\n";
 		echo '</fieldset>'."\n";
+
 		// export data in zip
 		echo '<fieldset id="e_zip">';
 		echo '<legend class="legend-backup">'.$GLOBALS['lang']['maintenance_incl_quoi'].'</legend>';
 		if (DBMS == 'sqlite')
-		echo "\t".'<p>'.select_yes_no('incl-sqlit', 0, $GLOBALS['lang']['bak_incl_sqlit']).'</p>'."\n";
-		echo "\t".'<p>'.select_yes_no('incl-confi', 0, $GLOBALS['lang']['bak_incl_confi']).'</p>'."\n";
+		echo "\t".'<p>'.form_checkbox('incl-sqlit', 0, $GLOBALS['lang']['bak_incl_sqlit']).'</p>'."\n";
+		echo "\t".'<p>'.form_checkbox('incl-confi', 0, $GLOBALS['lang']['bak_incl_confi']).'</p>'."\n";
 		echo '</fieldset>'."\n";
 		echo '<p class="submit-bttns">'."\n";
-		echo "\t".'<button class="submit button-cancel" type="button" onclick="annuler(\'maintenance.php\');">'.$GLOBALS['lang']['annuler'].'</button>'."\n";
+		echo "\t".'<button class="submit button-cancel" type="button" onclick="goToUrl(\'maintenance.php\');">'.$GLOBALS['lang']['annuler'].'</button>'."\n";
 		echo "\t".'<button class="submit button-submit" type="submit" name="do" value="export">'.$GLOBALS['lang']['valider'].'</button>'."\n";
 		echo '</p>'."\n";
 		echo hidden_input('token', $token);
@@ -179,15 +183,16 @@ if (!isset($_GET['do']) and !isset($_FILES['file'])) {
 
 	// Form import
 	$importformats = array(
-			'rssopml' => $GLOBALS['lang']['bak_import_rssopml'] );
+		'rssopml' => $GLOBALS['lang']['bak_import_rssopml']
+	);
 	echo '<form action="maintenance.php" method="post" enctype="multipart/form-data" class="bordered-formbloc" id="form_import">'."\n";
 		echo '<fieldset class="pref valid-center">';
 		echo '<legend class="legend-backup">'.$GLOBALS['lang']['maintenance_import'].'</legend>';
-		echo "\t".'<p>'.form_select_no_label('imp-format', $importformats, 'jsonbak');
+		echo "\t".'<p>'.form_select_no_label('imp-format', $importformats, 'rssopml');
 		echo '<input type="file" name="file" id="file" class="text" /></p>'."\n";
 		echo '</fieldset>'."\n";
 		echo '<p class="submit-bttns">'."\n";
-		echo "\t".'<button class="submit button-cancel" type="button" onclick="annuler(\'maintenance.php\');">'.$GLOBALS['lang']['annuler'].'</button>'."\n";
+		echo "\t".'<button class="submit button-cancel" type="button" onclick="goToUrl(\'maintenance.php\');">'.$GLOBALS['lang']['annuler'].'</button>'."\n";
 		echo "\t".'<button class="submit button-submit" type="submit" name="valider">'.$GLOBALS['lang']['valider'].'</button>'."\n";
 		echo '</p>'."\n";
 
@@ -198,16 +203,16 @@ if (!isset($_GET['do']) and !isset($_FILES['file'])) {
 	echo '<form action="maintenance.php" method="get" class="bordered-formbloc" id="form_optimi">'."\n";
 		echo '<fieldset class="pref valid-center">';
 		echo '<legend class="legend-sweep">'.$GLOBALS['lang']['maintenance_optim'].'</legend>';
+
 		if (DBMS == 'sqlite') {
 			echo "\t".'<p>'.select_yes_no('opti-vacu', 0, $GLOBALS['lang']['bak_opti_vacuum']).'</p>'."\n";
 		} else {
 			echo hidden_input('opti-vacu', 0);
 		}
 		echo "\t".'<p>'.select_yes_no('opti-rss', 0, $GLOBALS['lang']['bak_opti_supprreadrss']).'</p>'."\n";
-
 		echo '</fieldset>'."\n";
 		echo '<p class="submit-bttns">'."\n";
-		echo "\t".'<button class="submit button-cancel" type="button" onclick="annuler(\'maintenance.php\');">'.$GLOBALS['lang']['annuler'].'</button>'."\n";
+		echo "\t".'<button class="submit button-cancel" type="button" onclick="goToUrl(\'maintenance.php\');">'.$GLOBALS['lang']['annuler'].'</button>'."\n";
 		echo "\t".'<button class="submit button-submit" type="submit" name="do" value="optim">'.$GLOBALS['lang']['valider'].'</button>'."\n";
 		echo '</p>'."\n";
 		echo hidden_input('token', $token);
@@ -222,7 +227,7 @@ if (!isset($_GET['do']) and !isset($_FILES['file'])) {
 		echo '<fieldset class="pref valid-center">'."\n";
 		echo '<legend class="legend-backup">'.$GLOBALS['lang']['bak_restor_done'].'</legend>';
 		echo erreurs($erreurs_form);
-		echo '<p class="submit-bttns"><button class="submit button-submit" type="button" onclick="annuler(\'maintenance.php\')">'.$GLOBALS['lang']['valider'].'</button></p>'."\n";
+		echo '<p class="submit-bttns"><button class="submit button-submit" type="button" onclick="goToUrl(\'maintenance.php\')">'.$GLOBALS['lang']['valider'].'</button></p>'."\n";
 		echo '</fieldset>'."\n";
 		echo '</div>'."\n";
 
@@ -230,20 +235,9 @@ if (!isset($_GET['do']) and !isset($_FILES['file'])) {
 		// token : ok, go on !
 		if (isset($_GET['do'])) {
 			if ($_GET['do'] == 'export') {
-				// Export a ZIP archive
-				if (@$_GET['exp-format'] == 'zip') {
-					$dossiers = array();
-					if (@$_GET['incl-sqlit'] == 1) {
-						$dossiers[] = DIR_DATABASES;
-					}
-					if ($_GET['incl-confi'] == 1) {
-						$dossiers[] = DIR_CONFIG;
-					}
-					$file_archive = creer_fichier_zip($dossiers);
-
-				// Export a OPML rss lsit
-				} elseif (@$_GET['exp-format'] == 'opml') {
+				if (@$_GET['exp-format'] == 'opml') {
 					$file_archive = creer_fichier_opml();
+
 				} else {
 					echo 'nothing to do';
 				}
@@ -253,7 +247,6 @@ if (!isset($_GET['do']) and !isset($_FILES['file'])) {
 					echo '<form action="maintenance.php" method="get" class="bordered-formbloc">'."\n";
 					echo '<fieldset class="pref valid-center">';
 					echo '<legend class="legend-backup">'.$GLOBALS['lang']['bak_succes_save'].'</legend>';
-
 					echo '<p><a href="'.$file_archive.'" download>'.$GLOBALS['lang']['bak_dl_fichier'].'</a></p>'."\n";
 					echo '<p class="submit-bttns"><button class="submit button-submit" type="submit">'.$GLOBALS['lang']['valider'].'</button></p>'."\n";
 					echo '</fieldset>'."\n";
@@ -273,7 +266,7 @@ if (!isset($_GET['do']) and !isset($_FILES['file'])) {
 					// delete old RSS entries
 					if ($_GET['opti-rss'] == 1) {
 						try {
-							$req = $GLOBALS['db_handle']->prepare('DELETE FROM rss WHERE bt_statut=0');
+							$req = $GLOBALS['db_handle']->prepare('DELETE FROM rss WHERE bt_statut=0 AND WHERE bt_bookmarked=0');
 							$req->execute(array());
 						} catch (Exception $e) {
 							die('Erreur : 7873 : rss delete old entries : '.$e->getMessage());
@@ -293,9 +286,13 @@ if (!isset($_GET['do']) and !isset($_FILES['file'])) {
 		// $file
 		} elseif (isset($_POST['valider']) and !empty($_FILES['file']['tmp_name']) ) {
 				$message = array();
-				$xml = file_get_contents($_FILES['file']['tmp_name']);
-				$message['feeds'] = importer_opml($xml);
-
+				switch($_POST['imp-format']) {
+					case 'rssopml':
+						$xml = file_get_contents($_FILES['file']['tmp_name']);
+						$message['feeds'] = importer_opml($xml);
+					break;
+					default: die('nothing'); break;
+				}
 				if (!empty($message)) {
 					echo '<form action="maintenance.php" method="get" class="bordered-formbloc">'."\n";
 					echo '<fieldset class="pref valid-center">';
@@ -318,13 +315,5 @@ echo '</div>'."\n";
 
 
 echo "\n".'<script src="style/javascript.js" type="text/javascript"></script>'."\n";
-echo '<script type="text/javascript">';
-echo 'var ia = document.getElementById(\'incl-artic\');';
-echo "ia.addEventListener('change', function() { document.getElementById('nb-artic').style.display = ( ia.value == 1 ? 'inline-block' : 'none'); });";
-
-echo 'var il = document.getElementById(\'incl-links\');';
-echo "il.addEventListener('change', function() { document.getElementById('nb-links').style.display = ( il.value == 1 ? 'inline-block' : 'none'); });";
-
-echo '</script>';
 
 footer($begin);

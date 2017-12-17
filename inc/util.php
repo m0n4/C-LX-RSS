@@ -24,6 +24,18 @@ function decode_id($id) {
 	return $retour;
 }
 
+// used sometimes, like in the email that is sent.
+function get_blogpath($id, $titre) {
+	$date = decode_id($id);
+	$path = $GLOBALS['racine'].'?d='.$date['annee'].'/'.$date['mois'].'/'.$date['jour'].'/'.$date['heure'].'/'.$date['minutes'].'/'.$date['secondes'].'-'.titre_url($titre);
+	return $path;
+}
+
+function article_anchor($id) {
+	$anchor = 'id'.substr(md5($id), 0, 6);
+	return $anchor;
+}
+
 
 // tri un tableau non pas comme "sort()" sur l’ID, mais selon une sous clé d’un tableau.
 function tri_selon_sous_cle($table, $cle) {
@@ -36,11 +48,9 @@ function tri_selon_sous_cle($table, $cle) {
 	return $table;
 }
 
-
 function get_ip() {
 	return (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) ? htmlspecialchars($_SERVER['HTTP_X_FORWARDED_FOR']) : htmlspecialchars($_SERVER['REMOTE_ADDR']);
 }
-
 
 function check_session() {
 	if (USE_IP_IN_SESSION == 1) {
@@ -126,6 +136,31 @@ function check_token($token) {
 }
 
 
+/**
+ * remove params from url
+ * 
+ * @param string $param
+ * @return string url
+ */
+function remove_url_param($param) {
+	if (isset($_GET[$param])) {
+		return str_replace(
+					array(
+						'&'.$param.'='.$_GET[$param],
+						'?'.$param.'='.$_GET[$param],
+						'?&amp;',
+						'?&',
+						'?',
+					),
+					array('','?','?','?',''),
+					'?'.$_SERVER['QUERY_STRING']
+				);
+	} elseif (isset($_SERVER['QUERY_STRING'])) {
+		return $_SERVER['QUERY_STRING'];
+	}
+	return '';
+}
+
 
 /* search query parsing (operators, exact matching, etc) */
 function parse_search($q) {
@@ -148,6 +183,10 @@ function debug($data) {
 	echo '<pre>';
 	print_r($data);
 	die;
+}
+
+function debuglog($data) {
+	file_put_contents('log.log', print_r($data, true));
 }
 
 /* remove the folders "." and ".." from the list of files returned by scandir(). */

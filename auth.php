@@ -5,7 +5,22 @@
 // Since 2016, by Timo Van Neerden.
 // C60 is free software, under MIT/X11 Licence.
 
-require_once 'inc/inc.php';
+
+require_once 'inc/boot.php';
+
+
+
+// Acces LOG
+if (isset($_POST['nom_utilisateur'])) {
+	creer_dossier(DIR_LOG, 1);
+	// IP
+	$ip = htmlspecialchars($_SERVER["REMOTE_ADDR"]);
+	// Proxy IPs, if exists.
+	$ip .= (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) ? '_'.htmlspecialchars($_SERVER['HTTP_X_FORWARDED_FOR']) : '';
+	$data = '<?php // '.date('r').' - '.$ip.' - '.((valider_form()===TRUE) ? 'login succes' : 'login failed for '. '“'.htmlspecialchars($_POST['nom_utilisateur']).'”') ."\n";
+	file_put_contents(DIR_LOG.'xauthlog.php', $data, FILE_APPEND);
+}
+
 
 if (check_session() === TRUE) { // return to index if session is already open.
 	header('Location: index.php');
@@ -45,7 +60,6 @@ if (isset($_POST['_verif_envoi']) and valider_form() === TRUE) { // OK : getting
 	header('Location: '.$location);
 
 } else { // On sort…
-
 		// …et affiche la page d'auth
 		afficher_html_head('Identification');
 		echo '<div id="axe">'."\n";

@@ -5,15 +5,21 @@
 // Since 2016, by Timo Van Neerden.
 // C60 is free software, under MIT/X11 Licence.
 
-// Set encoding to UTF-8
+if (!defined('IS_IT_INSTALL')) {
+	if ( !file_exists('config/user.ini') || !file_exists('config/prefs.php') ) {
+		header('Location: install.php');
+		exit;
+	}
+}
 
-// it's not for 0.00000002 sec ...
 $begin = microtime(true);
 
 // Use UTF-8 for all
 mb_internal_encoding('UTF-8');
 
-define('BT_ROOT', dirname(__dir__).'/');
+define('IS_IN_ADMIN', true);
+define('BT_ROOT_ADMIN', dirname(dirname(dirname(__file__))).'/');
+define('BT_ROOT', dirname(dirname(__file__)).'/');
 
 // if dev mod
 error_reporting(-1);
@@ -38,13 +44,18 @@ function import_ini_file($file_path) {
 
 
 // Constants: folders
+define('DIR_ADMIN', BT_ROOT.'admin/');
 define('DIR_DATABASES', BT_ROOT.'databases/');
 define('DIR_CONFIG', BT_ROOT.'config/');
-define('DIR_BACKUP', BT_ROOT.'backup/');
-define('DIR_CACHE', BT_ROOT.'cache/');
+
+define('DIR_VAR', BT_ROOT.'var/');
+define('DIR_BACKUP', DIR_VAR.'backup/');
+define('DIR_CACHE', DIR_VAR.'cache/');
+define('DIR_LOG', DIR_VAR.'log/');
+
 // Constants: databases
 define('FEEDS_DB', DIR_DATABASES.'rss.php');
-define('SQL_DB', DIR_DATABASES.'database.sqlite'); // RSS-feeds list info storage.
+define('SQL_DB', DIR_DATABASES.'database.sqlite');
 
 // Constants: installation configurations
 define('FILE_USER', DIR_CONFIG.'user.ini');
@@ -55,10 +66,9 @@ define('FILE_MYSQL', DIR_CONFIG.'mysql.ini');
 // Constants: general
 define('BLOGOTEXT_NAME', 'CLX');
 define('BLOGOTEXT_SITE', 'https://github.com/timovn/C-LX-RSS');
-define('BLOGOTEXT_VERSION', '0.0.1');
+define('BLOGOTEXT_VERSION', '0.0.1-171217');
 define('MINIMAL_PHP_REQUIRED_VERSION', '5.5');
-define('BLOGOTEXT_UA', 'Mozilla/5.0 (Windows NT 10; WOW64; rv:47.0) Gecko/20100101 Firefox/55.0');
-
+define('BLOGOTEXT_UA', 'Mozilla/5.0 (X11; Linux x86_64; rv:57.0) Gecko/20100101 Firefox/57.0');
 
 
 // ADVANCED CONFIG OPTIONS
@@ -73,6 +83,9 @@ import_ini_file(FILE_USER);
 // USER PREFS
 if (file_exists(FILE_SETTINGS)) { require_once FILE_SETTINGS; }
 
+// Constantes: URL
+define('URL_ROOT', $GLOBALS['racine'] . ((strrpos($GLOBALS['racine'], '/', -1) === false) ? '/' : '' ));
+
 /**
  * main dependancys
  */
@@ -86,3 +99,6 @@ require_once BT_ROOT.'inc/conv.php';
 require_once BT_ROOT.'inc/veri.php';
 require_once BT_ROOT.'inc/sqli.php';
 
+if (!defined('IS_IT_INSTALL')) {
+	$GLOBALS['db_handle'] = open_base();
+}

@@ -69,6 +69,11 @@
 	padding-right: 5px;
 }
 
+#maintenance-form #nb-artic,
+#maintenance-form #nb-links {
+	display: none;
+}
+
 #maintenance-form .submit-bttns {
 	margin: 0px auto 15px;
 	padding: 0px 20px;

@@ -5,6 +5,7 @@
 // Since 2016, by Timo Van Neerden.
 // C60 is free software, under MIT/X11 Licence.
 
+
 function valider_form_preferences() {
 	$erreurs = array();
 	if (!( isset($_POST['token']) and check_token($_POST['token'])) ) {
@@ -41,6 +42,7 @@ function valider_form_preferences() {
 	}
 	return $erreurs;
 }
+
 
 function valider_form_rss() {
 	$erreurs = array();

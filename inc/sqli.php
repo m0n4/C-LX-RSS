@@ -31,7 +31,6 @@ function create_tables() {
 			bt_bookmarked TINYINT,
 			bt_folder TEXT
 		); CREATE INDEX $if_not_exists dateidR ON rss ( bt_date, bt_id$index_limit_size );";
-
 	/*
 	* SQLite
 	*
@@ -49,7 +48,12 @@ function create_tables() {
 					$db_handle = new PDO('sqlite:'.$file);
 					$db_handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 					$db_handle->query("PRAGMA temp_store=MEMORY; PRAGMA synchronous=OFF; PRAGMA journal_mode=WAL;");
-					$results = $db_handle->exec($dbase_structure['rss']);
+
+
+					$wanted_tables = array_keys($dbase_structure);
+					foreach ($wanted_tables as $table_name) {
+							$results = $db_handle->exec($dbase_structure[$table_name]);
+					}
 				} catch (Exception $e) {
 					die('Erreur 1: '.$e->getMessage());
 				}
@@ -66,9 +70,10 @@ function create_tables() {
 					$db_handle = new PDO('mysql:host='.MYSQL_HOST.';dbname='.MYSQL_DB.";charset=utf8;sql_mode=PIPES_AS_CONCAT;", MYSQL_LOGIN, MYSQL_PASS, $options_pdo);
 					// check each wanted table
 					$wanted_tables = array_keys($dbase_structure);
-
-					$results = $db_handle->query($dbase_structure['rss']."DEFAULT CHARSET=utf8");
-					$results->closeCursor();
+					foreach ($wanted_tables as $table_name) {
+							$results = $db_handle->query($dbase_structure[$table_name]."DEFAULT CHARSET=utf8");
+							$results->closeCursor();
+					}
 				} catch (Exception $e) {
 					die('Erreur 2: '.$e->getMessage());
 				}
@@ -88,19 +93,79 @@ function open_base() {
 
 
 /* lists articles with search criterias given in $array. Returns an array containing the data*/
-function liste_elements($query, $array) {
+function liste_elements($query, $array, $data_type) {
 	try {
 		$req = $GLOBALS['db_handle']->prepare($query);
 		$req->execute($array);
 		$return = array();
-		while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
-			$return[] = $row;
+
+		switch ($data_type) {
+			case 'rss':
+				while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
+					$return[] = $row;
+				}
+				break;
+			default:
+				break;
 		}
+
 		return $return;
 	} catch (Exception $e) {
+		die($query);
 		die('Erreur 89208 : '.$e->getMessage());
 	}
 }
+
+/* same as above, but return the amount of entries */
+function liste_elements_count($query, $array) {
+	try {
+		$req = $GLOBALS['db_handle']->prepare($query);
+		$req->execute($array);
+		$result = $req->fetch();
+		return $result['nbr'];
+	} catch (Exception $e) {
+		die('Erreur 0003: '.$e->getMessage());
+	}
+}
+
+// returns or prints an entry of some element of some table (very basic)
+function get_entry($table, $entry, $id, $retour_mode) {
+	$query = "SELECT $entry FROM $table WHERE bt_id=?";
+	try {
+		$req = $GLOBALS['db_handle']->prepare($query);
+		$req->execute(array($id));
+		$result = $req->fetch();
+		//echo '<pre>';print_r($result);
+	} catch (Exception $e) {
+		die('Erreur : '.$e->getMessage());
+	}
+
+	if ($retour_mode == 'return' and !empty($result[$entry])) {
+		return $result[$entry];
+	}
+	if ($retour_mode == 'echo' and !empty($result[$entry])) {
+		echo $result[$entry];
+	}
+	return '';
+}
+
+
+
+
+
+/* FOR COMMENTS : RETUNS nb_com per author */
+function nb_entries_as($table, $what) {
+	$result = array();
+	$query = "SELECT count($what) AS nb, $what FROM $table GROUP BY $what ORDER BY nb DESC";
+	try {
+		$result = $GLOBALS['db_handle']->query($query)->fetchAll(PDO::FETCH_ASSOC);
+		return $result;
+	} catch (Exception $e) {
+		die('Erreur 0349 : '.$e->getMessage());
+	}
+}
+
+
 
 /* Enregistre le flux dans une BDD.
    $flux est un Array avec les données dedans.

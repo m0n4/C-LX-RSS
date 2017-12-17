@@ -5,7 +5,9 @@
 // Since 2016, by Timo Van Neerden.
 // C60 is free software, under MIT/X11 Licence.
 
-
+function titre_url($title) {
+	return trim(diacritique($title), '-');
+}
 
 // remove slashes if necessary
 function clean_txt($text) {
@@ -16,32 +18,56 @@ function clean_txt($text) {
 	}
 }
 
+function protect($text) {
+	return htmlspecialchars(clean_txt($text));
+}
+
+function diacritique($texte) {
+	$texte = strip_tags($texte);
+	$texte = html_entity_decode($texte, ENT_QUOTES, 'UTF-8'); // &eacute => é ; é => é ; (uniformize)
+	$texte = htmlentities($texte, ENT_QUOTES, 'UTF-8'); // é => &eacute;
+	$texte = preg_replace('#&(.)(acute|grave|circ|uml|cedil|tilde|ring|slash|caron);#', '$1', $texte); // &eacute => e
+	$texte = preg_replace('#(\t|\n|\r)#', ' ' , $texte); // \n, \r => spaces
+	$texte = preg_replace('#&([a-z]{2})lig;#i', '$1', $texte); // œ => oe ; æ => ae
+	$texte = preg_replace('#&[\w\#]*;#U', '', $texte); // remove other entities like &quote, &nbsp.
+	$texte = preg_replace('#[^\w -]#U', '', $texte); // keep only ciffers, letters, spaces, hyphens.
+	$texte = strtolower($texte); // to lower case
+	$texte = preg_replace('#[ ]+#', '-', $texte); // spaces => hyphens
+	return $texte;
+}
+
+function rel2abs_admin($article) {
+	// if relative URI in path, make absolute paths (since /admin/ panel is 1 lv deeper) for href/src.
+	$article = preg_replace('#(src|href)=\"(?!(/|[a-z]+://))#i','$1="../', $article);
+	return $article;
+}
+
 function date_formate($id, $format_force='') {
 	$retour ='';
 	$date= decode_id($id);
-		$jour_l = jour_en_lettres($date['jour'], $date['mois'], $date['annee']);
-		$mois_l = mois_en_lettres($date['mois']);
-			$format = array (
-				'0' => $date['jour'].'/'.$date['mois'].'/'.$date['annee'],         // 14/01/1983
-				'1' => $date['mois'].'/'.$date['jour'].'/'.$date['annee'],         // 01/14/1983
-				'2' => $date['jour'].' '.$mois_l.' '.$date['annee'],               // 14 janvier 1983
-				'3' => $jour_l.' '.$date['jour'].' '.$mois_l.' '.$date['annee'],   // vendredi 14 janvier 1983
-				'4' => $jour_l.' '.$date['jour'].' '.$mois_l,                      // vendredi 14 janvier
-				'5' => $mois_l.' '.$date['jour'].', '.$date['annee'],              // janvier 14, 1983
-				'6' => $jour_l.', '.$mois_l.' '.$date['jour'].', '.$date['annee'], // vendredi, janvier 14, 1983
-				'7' => $date['annee'].'-'.$date['mois'].'-'.$date['jour'],         // 1983-01-14
-				'8' => substr($jour_l,0,3).'. '.$date['jour'].' '.$mois_l,         // ven. 14 janvier
-			);
+	$jour_l = jour_en_lettres($date['jour'], $date['mois'], $date['annee']);
+	$mois_l = mois_en_lettres($date['mois']);
+		$format = array (
+			'0' => $date['jour'].'/'.$date['mois'].'/'.$date['annee'],         // 14/01/1983
+			'1' => $date['mois'].'/'.$date['jour'].'/'.$date['annee'],         // 01/14/1983
+			'2' => $date['jour'].' '.$mois_l.' '.$date['annee'],               // 14 janvier 1983
+			'3' => $jour_l.' '.$date['jour'].' '.$mois_l.' '.$date['annee'],   // vendredi 14 janvier 1983
+			'4' => $jour_l.' '.$date['jour'].' '.$mois_l,                      // vendredi 14 janvier
+			'5' => $mois_l.' '.$date['jour'].', '.$date['annee'],              // janvier 14, 1983
+			'6' => $jour_l.', '.$mois_l.' '.$date['jour'].', '.$date['annee'], // vendredi, janvier 14, 1983
+			'7' => $date['annee'].'-'.$date['mois'].'-'.$date['jour'],         // 1983-01-14
+			'8' => substr($jour_l,0,3).'. '.$date['jour'].' '.$mois_l,         // ven. 14 janvier
+		);
 
-		if ($format_force != '') {
-			$retour = $format[$format_force];
-		} else {
-			$retour = $format[$GLOBALS['format_date']];
-		}
+	if ($format_force != '') {
+		$retour = $format[$format_force];
+	} else {
+		$retour = $format[$GLOBALS['format_date']];
+	}
 	return ucfirst($retour);
 }
 
-function heure_formate($id) {
+function heure_formate($id, $format_force='') {
 	$date = decode_id($id);
 	$timestamp = mktime($date['heure'], $date['minutes'], $date['secondes'], $date['mois'], $date['jour'], $date['annee']);
 	$format = array (
@@ -50,8 +76,13 @@ function heure_formate($id) {
 		'2' => date('h\:i\:s A',$timestamp),	// 11:56:04 PM
 		'3' => date('h\:i A',$timestamp),		// 11:56 PM
 	);
-	$valeur = $format[$GLOBALS['format_heure']];
-	return $valeur;
+
+	if ($format_force != '') {
+		$retour = $format[$format_force];
+	} else {
+		$retour = $format[$GLOBALS['format_heure']];
+	}
+	return $retour;
 }
 
 function date_formate_iso($id) {
@@ -95,55 +126,25 @@ function taille_formate($taille) {
 }
 
 function en_lettres($captchavalue) {
-	return $GLOBALS['lang'][strval($captchavalue)];
+	return $GLOBALS['lang']['chiffres'][strval($captchavalue)];
 }
 
-function jour_en_lettres($jour, $mois, $annee) {
+function jour_en_lettres($jour, $mois, $annee, $abbrv=0) {
 	$date = date('w', mktime(0, 0, 0, $mois, $jour, $annee));
-	switch($date) {
-		case 0: return $GLOBALS['lang']['dimanche']; break;
-		case 1: return $GLOBALS['lang']['lundi']; break;
-		case 2: return $GLOBALS['lang']['mardi']; break;
-		case 3: return $GLOBALS['lang']['mercredi']; break;
-		case 4: return $GLOBALS['lang']['jeudi']; break;
-		case 5: return $GLOBALS['lang']['vendredi']; break;
-		case 6: return $GLOBALS['lang']['samedi']; break;
+	$date = ($date == '0') ? '7' : $date;
+	if ($abbrv == 1) {
+		return $GLOBALS['lang']['days_abbr'][$date-1];
+	} else {
+		return $GLOBALS['lang']['days_fullname'][$date-1];
 	}
-	return $nom;
 }
 
 function mois_en_lettres($numero, $abbrv=0) {
 	if ($abbrv == 1) {
-		switch($numero) {
-			case '01': return $GLOBALS['lang']['janv.']; break;
-			case '02': return $GLOBALS['lang']['fev.']; break;
-			case '03': return $GLOBALS['lang']['mars.']; break;
-			case '04': return $GLOBALS['lang']['avr.']; break;
-			case '05': return $GLOBALS['lang']['mai.']; break;
-			case '06': return $GLOBALS['lang']['juin.']; break;
-			case '07': return $GLOBALS['lang']['juil.']; break;
-			case '08': return $GLOBALS['lang']['aout.']; break;
-			case '09': return $GLOBALS['lang']['sept.']; break;
-			case '10': return $GLOBALS['lang']['oct.']; break;
-			case '11': return $GLOBALS['lang']['nov.']; break;
-			case '12': return $GLOBALS['lang']['dec.']; break;
-		}
+		return $GLOBALS['lang']['months_abbr'][$numero-1];
 	}
 	else {
-		switch($numero) {
-			case '01': return $GLOBALS['lang']['janvier']; break;
-			case '02': return $GLOBALS['lang']['fevrier']; break;
-			case '03': return $GLOBALS['lang']['mars']; break;
-			case '04': return $GLOBALS['lang']['avril']; break;
-			case '05': return $GLOBALS['lang']['mai']; break;
-			case '06': return $GLOBALS['lang']['juin']; break;
-			case '07': return $GLOBALS['lang']['juillet']; break;
-			case '08': return $GLOBALS['lang']['aout']; break;
-			case '09': return $GLOBALS['lang']['septembre']; break;
-			case '10': return $GLOBALS['lang']['octobre']; break;
-			case '11': return $GLOBALS['lang']['novembre']; break;
-			case '12': return $GLOBALS['lang']['decembre']; break;
-		}
+		return $GLOBALS['lang']['months_fullname'][$numero-1];
 	}
 }
 

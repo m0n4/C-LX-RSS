@@ -5,7 +5,7 @@
 // Since 2016, by Timo Van Neerden.
 // C60 is free software, under MIT/X11 Licence.
 
-require_once 'inc/inc.php';
+require_once 'inc/boot.php';
 
 // Update all RSS feeds using GET (for cron jobs).
 // only test here is on install UID.
@@ -23,9 +23,7 @@ if (isset($_GET['refresh_all'], $_GET['guid']) and ($_GET['guid'] == BLOG_UID)) 
 
 
 operate_session();
-$GLOBALS['db_handle'] = open_base();
 $GLOBALS['liste_flux'] = open_serialzd_file(FEEDS_DB);
-
 
 /*
 	This file is called by the other files. It is an underground working script,

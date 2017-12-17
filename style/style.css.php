@@ -10,7 +10,7 @@ else {
 
 header("Content-type: text/css; charset: UTF-8");
 
-/* FOR MAINTENANCE : CSS FILES ARE SPLITED IN MULTIPLE FILES
+/* FOR MAINTENANCE: CSS FILES ARE SPLITED IN MULTIPLE FILES
 -------------------------------------------------------------*/
 
 echo '/* General styles (layout, forms, multi-pages elements…) */'."\n";
@@ -25,14 +25,8 @@ readfile('style-rss.css');
 echo '/* Prefs + maintainance pages */'."\n";
 readfile('style-preferences.css');
 
-echo '/* Media-queries < 1100px */'."\n";
-readfile('style-mobile-lt1100px.css');
-
-echo '/* Media-queries < 850px */'."\n";
-readfile('style-mobile-lt850px.css');
-
-echo '/* Media-queries < 700px */'."\n";
-readfile('style-mobile-lt700px.css');
+echo '/* Media-queries */'."\n";
+readfile('style-mobile.css');
 
 if (is_file('../../config/custom-styles.css')) {
 	echo '/* User-Custom CSS */'."\n";
