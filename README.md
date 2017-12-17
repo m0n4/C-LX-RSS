@@ -1,54 +1,47 @@
-# C60
+# C-LX RSS
 
 ---
 
-This is [C60](http://lehollandaisvolant.net/c60/), the lightweight multi-tools Web-based panel.
+This is C-LX RSS Reader, a SQLite based RSS aggregator, by Timo van Neerden, since 2017.
 
-With C60 you can hold a blog, share links, upload and share photos or files, follow RSS feeds, save notes & manage an agenda…
+C-LX is originally based on [Blogotexts](https://github.com/BoboTiG/blogotext/) RSS reader.
 
-(by Timo van Neerden, since 2016)
+![alt tag](screenshot.png?raw=true)
 
 ---
 
 ## Features
 
- * Blog with comments and RSS feeds
- * Links sharing
- * RSS Reader
- * Images/Files uploading and sharing
- * Notes Saving
-
-![alt tag](https://lehollandaisvolant.net/blogotext/blogotext-screen.png?3)
+C-LX RSS is juste another, single user, web-based, RSS Reader. It comes with OPML and CronJobs support.
 
 ---
 
 ## Installation
- * Unzip the downloaded archive file into a folder
- * Upload the folder to your site
+ * Unzip the downloaded archive file
+ * Upload folder to your site (eg: to `http://example.com/feed-reader/`)
  * Use your browser to go to your site
- * Follow the onscreen steps
+ * Follow the few steps
 
 ---
 
 ## Requirements
-### Server-side requirements
- * PHP >5.5
- * min 1 Mb disk space (more userdata = more space needed)
-
-### Required PHP-libraries
- * PHP-PDO (with SQLite or/and MySQL support);
- * cURL (for RSS reader, links sharing, comments icons)
- * GD (for comments icons / favicons);
- * LibXML (for RSS reader)
- * GZip (for zip exporting function)
- * MB-string (for blog)
-
-### Client-side requirements
- * A modern web-browser (HTML5, CSS3, ES6), either desktop or mobile
- * JavaScript & Cookies must be allowed.
+### Required components
+ * PHP >5.5 and SQLite with PDO support (or MySQL with PDO Support)
+ * A modern web-browser (desktop or mobile)
+ * min 1 Mo server-side disk space (more userdata = more space needed)
+ * PHP GD module (for favicons);
+ * PHP cURL module
+ * PHP LibXML module
 
 ---
 
 ## Legal Notice.
 
-C60 is based on a fork of [BlogoText 3](https://github.com/BlogoText/blogotext).
+C-LX RSS is based on parts of BlogoText 3 (under MIT Licence), by Timo van Neerden, itself based on BlogoText, by Fred Nassar.
+
+Fred N. created BlogoText back in 2006. The script has been taken over by Timo V.N. in 2010 and until 2016.
+BlogoText has then been taken over by Mickaël Schoentgen & Community.
+
+C-LX RSS Reader has continued to evolve on it’s own.
+
+C-LX RSS Reader is distributed under the MIT Licence.
