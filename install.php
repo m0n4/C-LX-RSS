@@ -1,15 +1,11 @@
 <?php
-# *** LICENSE ***
-# This file is part of BlogoText.
-# http://lehollandaisvolant.net/blogotext/
-#
-# 2006      Frederic Nassar.
-# 2010-2016 Timo Van Neerden.
-#
-# BlogoText is free software.
-# You can redistribute it under the terms of the MIT / X11 Licence.
-#
-# *** LICENSE ***
+// *** LICENSE ***
+// oText is free software.
+//
+// By Fred Nassar (2006) and Timo Van Neerden (since 2010)
+// See "LICENSE" file for info.
+// *** LICENSE ***
+
 
 define('IS_IT_INSTALL', true);
 
@@ -29,7 +25,7 @@ if ( (file_exists('config/user.ini')) and (file_exists('config/prefs.php')) and 
 // some constants definition
 define('DISPLAY_PHP_ERRORS', '-1');
 $GLOBALS['fuseau_horaire'] = 'UTC';
-
+$GLOBALS['racine'] = '';
 
 if (isset($_GET['l'])) {
 	$lang = $_GET['l'];
@@ -40,8 +36,6 @@ if (isset($_GET['l'])) {
 	}
 
 }
-
-$GLOBALS['racine'] = str_replace('install.php', '', 'http://'.$_SERVER['SERVER_NAME'].$_SERVER['SCRIPT_NAME']);
 
 require_once 'inc/boot.php';
 
@@ -72,7 +66,7 @@ elseif ($GLOBALS['step'] == '2') {
 		} else {
 			creer_dossier(DIR_CONFIG, 1);
 			creer_dossier(DIR_DATABASES, 1);
-			creer_dossier(DIR_VAR, 1);
+			creer_dossier(DIR_VAR, 0);
 			fichier_user();
 			import_ini_file(DIR_CONFIG.'user.ini');
 
@@ -108,7 +102,7 @@ elseif ($GLOBALS['step'] == '2') {
 
 // affiche le form de choix de langue
 function afficher_form_1($erreurs='') {
-	afficher_html_head('Install');
+	afficher_html_head('Install', "install");
 	echo '<div id="axe">'."\n";
 	echo '<div id="pageauth">'."\n";
 	echo '<h1>'.BLOGOTEXT_NAME.'</h1>'."\n";
@@ -123,6 +117,14 @@ function afficher_form_1($erreurs='') {
 	// pdo_sqlite and pdo_mysql (minimum one is required)
 	if (!extension_loaded('pdo_sqlite') and !extension_loaded('pdo_mysql') ) {
 		$conferrors[] = "\t".'<li>Neither <b>pdo_sqlite</b> or <b>pdo_mysql</b> PHP-modules are loaded. Blogotext needs at least one.</li>'."\n";
+	}
+	// check cUrl
+	if (!extension_loaded('curl')) {
+		$conferrors[] = "\t".'<li>cURL is not installed. oText-RSS requires "php-curl" module to be installed and active.</li>'."\n";
+	}
+	// check libXML
+	if (!extension_loaded('libxml')) {
+		$conferrors[] = "\t".'<li>LibXML is not installed. oText-RSS requires "php-libxml" module to be installed and active.</li>'."\n";
 	}
 	// check directory readability
 	if (!is_writable('../') ) {
@@ -150,7 +152,7 @@ function afficher_form_1($erreurs='') {
 
 // form pour login + mdp + url
 function afficher_form_2($erreurs='') {
-	afficher_html_head('Install');
+	afficher_html_head('Install', "install");
 	echo '<div id="axe">'."\n";
 	echo '<div id="pageauth">'."\n";
 	echo '<h1>'.BLOGOTEXT_NAME.'</h1>'."\n";
@@ -180,7 +182,7 @@ function afficher_form_2($erreurs='') {
 // form choix SGBD
 function afficher_form_3($erreurs='') {
 
-	afficher_html_head('Install');
+	afficher_html_head('Install', "install");
 	echo '<div id="axe">'."\n";
 	echo '<div id="pageauth">'."\n";
 	echo '<h1>'.BLOGOTEXT_NAME.'</h1>'."\n";

@@ -1,9 +1,10 @@
 <?php
 // *** LICENSE ***
+// oText is free software.
 //
-// This file is part of C60.
-// Since 2016, by Timo Van Neerden.
-// C60 is free software, under MIT/X11 Licence.
+// By Fred Nassar (2006) and Timo Van Neerden (since 2010)
+// See "LICENSE" file for info.
+// *** LICENSE ***
 
 function redirection($url) {
 	header('Location: '.$url);
@@ -24,18 +25,12 @@ function decode_id($id) {
 	return $retour;
 }
 
-// used sometimes, like in the email that is sent.
+// Returns the URL of a blog post (with it’s id and title)
+
 function get_blogpath($id, $titre) {
-	$date = decode_id($id);
-	$path = $GLOBALS['racine'].'?d='.$date['annee'].'/'.$date['mois'].'/'.$date['jour'].'/'.$date['heure'].'/'.$date['minutes'].'/'.$date['secondes'].'-'.titre_url($titre);
+	$path = $GLOBALS['racine'].'?d='.$id.'--'.trim(diacritique($titre), '-');
 	return $path;
 }
-
-function article_anchor($id) {
-	$anchor = 'id'.substr(md5($id), 0, 6);
-	return $anchor;
-}
-
 
 // tri un tableau non pas comme "sort()" sur l’ID, mais selon une sous clé d’un tableau.
 function tri_selon_sous_cle($table, $cle) {
@@ -58,8 +53,9 @@ function check_session() {
 	} else {
 		$ip = date('m');
 	}
-	@session_start();
 	ini_set('session.cookie_httponly', TRUE);
+	session_set_cookie_params(365*24*60*60); // set new expiration time to the browser
+	@session_start();
 
 	// generate hash for cookie
 	$newUID = hash('sha256', USER_PWHASH.USER_LOGIN.md5($_SERVER['HTTP_USER_AGENT'].$ip));
@@ -67,7 +63,6 @@ function check_session() {
 	// check old cookie  with newUID
 	if (isset($_COOKIE['BT-admin-stay-logged']) and $_COOKIE['BT-admin-stay-logged'] == $newUID) {
 		$_SESSION['user_id'] = md5($newUID);
-		session_set_cookie_params(365*24*60*60); // set new expiration time to the browser
 		session_regenerate_id(true);  // Send cookie
 		// Still logged in, return
 		return TRUE;
@@ -160,7 +155,6 @@ function remove_url_param($param) {
 	}
 	return '';
 }
-
 
 /* search query parsing (operators, exact matching, etc) */
 function parse_search($q) {

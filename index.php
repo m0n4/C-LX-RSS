@@ -1,9 +1,10 @@
 <?php
 // *** LICENSE ***
+// oText is free software.
 //
-// This file is part of C60.
-// Since 2016, by Timo Van Neerden.
-// C60 is free software, under MIT/X11 Licence.
+// By Fred Nassar (2006) and Timo Van Neerden (since 2010)
+// See "LICENSE" file for info.
+// *** LICENSE ***
 
 require_once 'inc/boot.php';
 operate_session();
@@ -11,22 +12,32 @@ setcookie('lastAccessRss', time(), time()+365*24*60*60, null, null, false, true)
 $GLOBALS['liste_flux'] = open_serialzd_file(FEEDS_DB);
 
 
-
 /* Returns the HTML list with the feeds (the left panel with the sites, not the posts themselves) */
 function feed_list_html() {
 	// counts unread feeds in DB
 	$feeds_nb = rss_count_feed();
-	$total_unread = $total_favs = 0;
+	$total_unread = $total_favs = $total_today = 0;
 	foreach ($feeds_nb as $feed) {
 		$total_unread += $feed['nbrun'];
 		$total_favs += $feed['nbfav'];
+		$total_today += $feed['nbtoday'];
 	}
 
-	// First item : link all feeds
-	$html = "\t\t".'<li class="all-feeds active-site"><a href="#" onclick="return RssWall.sortAll();">'.$GLOBALS['lang']['rss_label_all_feeds'].' <span id="global-post-counter" data-nbrun="'.$total_unread.'" class="counter">('.$total_unread.')</span></a></li>'."\n";
 
-	// Next item : favorites items
-	$html .= "\t\t".'<li class="fav-feeds"><a href="#" onclick="return RssWall.sortFavs();">'.$GLOBALS['lang']['rss_label_favs_feeds'].' <span id="favs-post-counter" data-nbrun="'.$total_favs.'" class="counter">('.$total_favs.')</span></a></li>'."\n";
+	// first item : special buttons (all feeds ; favs ; today)
+	$html = "\t\t".'<li class="special"><ul>'."\n";
+
+		// all feeds
+		$html .= "\t\t\t".'<li class="all-feeds active-site" id="global-post-counter" data-nbrun="'.$total_unread.'"><a href="#" onclick="return RssWall.sortAll();">'.$GLOBALS['lang']['rss_label_all_feeds'].'</a></li>'."\n";
+
+		// today items
+		$html .= "\t\t\t".'<li class="today-feeds" id="today-post-counter" data-nbrun="'.$total_today.'"><a href="#" onclick="return RssWall.sortToday();">'.$GLOBALS['lang']['rss_label_today_feeds'].'</a></li>'."\n";
+
+		// favorites items
+		$html .= "\t\t\t".'<li class="fav-feeds" id="favs-post-counter" data-nbrun="'.$total_favs.'"><a href="#" onclick="return RssWall.sortFavs();">'.$GLOBALS['lang']['rss_label_favs_feeds'].'</a></li>'."\n";
+
+	$html .= "\t\t".'</ul></li>'."\n";
+
 
 	$feed_urls = array();
 	foreach ($feeds_nb as $i => $feed) {
@@ -39,17 +50,17 @@ function feed_list_html() {
 		$feed['nbrun'] = (isset($feed_urls[$feed['link']]['nbrun']) ? $feed_urls[$feed['link']]['nbrun'] : 0);
 		$folders[$feed['folder']][] = $feed;
 	}
+
 	krsort($folders);
 
 	// creates html : lists RSS feeds without folder separately from feeds with a folder
 	foreach ($folders as $i => $folder) {
 		$li_html = "";
 		$folder_count = 0;
+		$folder_count_today = 0;
 		foreach ($folder as $j => $feed) {
-//			$li_html .= "\t\t".'<li class="feed-site" data-nbrun="'.$feed['nbrun'].'" data-feed-hash="'.crc32($feed['link']).'" title="'.$feed['link'].'">';
 			$li_html .= "\t\t\t\t".'<li class="feed-site" data-nbrun="'.$feed['nbrun'].'" data-feed-hash="'.crc32($feed['link']).'" title="'.$feed['link'].'">';
 			$li_html .= '<a href="#" '.(($feed['iserror'] > 2) ? 'class="feed-error" ': '' ).'onclick="return RssWall.sortItemsBySite(\''.crc32($feed['link']).'\');" style="background-image: url('.URL_ROOT.'favatar.php?w=favicon&amp;q='.parse_url($feed['link'], PHP_URL_HOST).')">'.htmlspecialchars($feed['title']).'</a>';
-			$li_html .= '<span class="counter">('.$feed['nbrun'].')</span>';
 			$li_html .= '</li>'."\n";
 			$folder_count += $feed['nbrun'];
 		}
@@ -57,8 +68,8 @@ function feed_list_html() {
 		if ($i != '') {
 			$html .= "\t\t".'<li class="feed-folder" data-nbrun="'.$folder_count.'" data-folder="'.$i.'">'."\n";
 			$html .= "\t\t\t".'<span class="feed-folder-title">'."\n";
-			$html .= "\t\t\t\t".'<a href="#" onclick="return RssWall.sortItemsByFolder(\''.$i.'\');">'.$i.'<span class="counter">('.$folder_count.')</span></a>'."\n";
-			$html .= "\t\t\t\t".'<a href="#" onclick="return hideFolder(this)" class="unfold">unfold</a>'."\n";
+			$html .= "\t\t\t\t".'<a href="#" onclick="return hideFolder(this)" class="unfold"></a>'."\n";
+			$html .= "\t\t\t\t".'<a href="#" onclick="return RssWall.sortItemsByFolder(\''.$i.'\');" class="foldername">'.$i.'</a>'."\n";
 			$html .= "\t\t\t".'</span>'."\n";
 			$html .= "\t\t\t".'<ul>'."\n";
 		}
@@ -79,6 +90,21 @@ function afficher_form_rssconf($errors='') {
 		echo erreurs($errors);
 	}
 	$out = '';
+	// form add new feed.
+	/*
+	$out .= '<form id="form-rss-add" method="post" action="feed.php?config">'."\n";
+	$out .= '<fieldset class="pref">'."\n";
+	$out .= '<legend class="legend-link">'.$GLOBALS['lang']['label_feed_ajout'].'</legend>'."\n";
+	$out .= "\t\t\t".'<label for="new-feed">'.$GLOBALS['lang']['label_feed_new'].':</label>'."\n";
+	$out .= "\t\t\t".'<input id="new-feed" name="new-feed" type="text" class="text" value="" placeholder="http://www.example.org/rss">'."\n";
+	$out .= '<p class="submit-bttns">'."\n";
+	$out .= "\t".'<button class="submit button-submit" type="submit" name="send">'.$GLOBALS['lang']['envoyer'].'</button>'."\n";
+	$out .= '</p>'."\n";
+	$out .= hidden_input('token', new_token());
+	$out .= hidden_input('verif_envoi', 1);
+	$out .= '</fieldset>'."\n";
+	$out .= '</form>'."\n";
+	*/
 
 	// Form edit + list feeds.
 	$out .= '<form id="form-rss-config" method="post" action="index.php?config">'."\n";
@@ -164,14 +190,15 @@ if (!isset($_GET['config'])) {
 }
 
 // DEBUT PAGE
-afficher_html_head($GLOBALS['lang']['mesabonnements']);
+afficher_html_head($GLOBALS['lang']['mesabonnements'], "feeds");
 afficher_topnav($GLOBALS['lang']['mesabonnements'], $html_sub_menu); #top
 
 echo '<div id="axe">'."\n";
 echo '<div id="page">'."\n";
+$out_html = '';
 
 if (isset($_GET['config'])) {
-	$out_html =  afficher_form_rssconf($erreurs);
+	$out_html .=  afficher_form_rssconf($erreurs);
 	$out_html .=  "\n".'<script src="style/javascript.js" type="text/javascript"></script>'."\n";
 	$out_html .=  "\n".'<script type="text/javascript">'."\n";
 	$out_html .=  'var token = \''.new_token().'\';'."\n";
@@ -210,14 +237,16 @@ if (isset($_GET['config'])) {
 }
 
 else {
-	// get list of posts from DB
-	// send to browser
-	$out_html = send_rss_json($tableau, true);
-	$out_html .= '<div id="rss-list">'."\n";
-	$out_html .= "\t".'<div id="posts-wrapper">'."\n";
+	// list of websites
 	$out_html .= "\t\t".'<ul id="feed-list">'."\n";
 	$out_html .= feed_list_html();
 	$out_html .= "\t\t".'</ul>'."\n";
+
+	// get list of posts from DB
+	// send to browser
+	$out_html .= send_rss_json($tableau, true);
+	$out_html .= '<div id="rss-list">'."\n";
+	$out_html .= "\t".'<div id="posts-wrapper">'."\n";
 	$out_html .= "\t\t".'<div id="post-list-wrapper">'."\n";
 	$out_html .= "\t\t\t".'<div id="post-list-title">'."\n";
 	$out_html .= "\t\t\t".'<ul class="rss-menu-buttons sub-menu-buttons">'."\n";

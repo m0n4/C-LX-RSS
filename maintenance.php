@@ -1,19 +1,138 @@
 <?php
-# *** LICENSE ***
-# This file is part of BlogoText.
-# http://lehollandaisvolant.net/blogotext/
-#
-# 2006      Frederic Nassar.
-# 2010-2016 Timo Van Neerden.
-#
-# BlogoText is free software.
-# You can redistribute it under the terms of the MIT / X11 Licence.
-#
-# *** LICENSE ***
+// *** LICENSE ***
+// oText is free software.
+//
+// By Fred Nassar (2006) and Timo Van Neerden (since 2010)
+// See "LICENSE" file for info.
+// *** LICENSE ***
 
+set_time_limit (180);
 require_once 'inc/boot.php';
 operate_session();
 $GLOBALS['liste_flux'] = open_serialzd_file(FEEDS_DB);
+
+
+/*
+ * reconstruit la BDD des fichiers (en synchronisant la liste des fichiers sur le disque avec les fichiers dans BDD)
+*/
+function rebuilt_file_db() {
+
+	/*
+	*
+	* BEGIN WITH LISTING FILES ACTUALLY ON DISC
+	*/
+
+	$img_on_disk = rm_dots_dir(scandir(DIR_IMAGES));
+	// scans also subdir of img/* (in one single array of paths)
+	foreach ($img_on_disk as $i => $e) {
+		$subelem = DIR_IMAGES.$e;
+		if (is_dir($subelem)) {
+			unset($img_on_disk[$i]); // rm folder entry itself
+			$subidir = rm_dots_dir(scandir($subelem));
+			foreach ($subidir as $j => $im) {
+				$img_on_disk[] = $e.'/'.$im;
+			}
+		}
+	}
+	foreach ($img_on_disk as $i => $e) {
+		$img_on_disk[$i] = '/'.$e;
+	}
+
+	$docs_on_disc = rm_dots_dir(scandir(DIR_DOCUMENTS));
+
+	// don’t cound thumbnails
+	$img_on_disk = array_filter($img_on_disk, function($file){return (!((preg_match('#-thb\.jpg$#', $file)) or (strpos($file, 'index.html') == 4))); });
+
+	/*
+	*
+	* THEN REMOVES FROM DATABASE THE IMAGES THAT ARE MISSING ON DISK
+	*/
+
+	$query = "SELECT bt_filename, bt_path, ID FROM images";
+	$img_in_db = liste_elements($query, array(), 'images');
+
+	$img_in_db_path = array(); foreach ($img_in_db as $i => $img) { $img_in_db_path[] = '/'.$img['bt_path'].'/'.$img['bt_filename']; }
+
+	$img_to_rm_from_db = array();
+
+	foreach ($img_in_db as $i => $img) {
+		if (!in_array('/'.$img['bt_path'].'/'.$img['bt_filename'], $img_on_disk)) {
+			$img_to_rm_from_db[] = $img['ID'];
+		}
+	}
+
+	if (!empty($img_to_rm_from_db)) {
+		try {
+			$GLOBALS['db_handle']->beginTransaction();
+			foreach($img_to_rm_from_db as $img) {
+				$query = 'DELETE FROM images WHERE ID = ? ';
+				$req = $GLOBALS['db_handle']->prepare($query);
+				$req->execute(array($img));
+			}
+			$GLOBALS['db_handle']->commit();
+		} catch (Exception $e) {
+			$req->rollBack();
+			die('Erreur 5798 on delete unexistant images : '.$e->getMessage());
+		}
+	}
+
+	/*
+	*
+	* ADD THE IMAGSE THAT ARE ON DISK BUT NOT IN DATABASE, TO DATABASE
+	*/
+
+	try {
+		$GLOBALS['db_handle']->beginTransaction();
+
+		foreach ($img_on_disk as $file) {
+			if (!in_array($file, $img_in_db_path)) {
+				$filepath = DIR_IMAGES.$file;
+				$time = filemtime($filepath);
+				$id = date('YmdHis', $time);
+				$checksum = sha1_file($filepath);
+				$filesize = filesize($filepath);
+				list($img_w, $img_h) = getimagesize($filepath);
+
+				$req = $GLOBALS['db_handle']->prepare('INSERT INTO images
+					(	bt_id,
+						bt_type,
+						bt_fileext,
+						bt_filename,
+						bt_filesize,
+						bt_content,
+						bt_folder,
+						bt_checksum,
+						bt_statut,
+						bt_path,
+						bt_dim_w,
+						bt_dim_h
+					)
+					VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+				$req->execute(array(
+					$id,
+					'image',
+					pathinfo($filepath, PATHINFO_EXTENSION),
+					$file,
+					$filesize,
+					'',
+					'',
+					$checksum,
+					0,
+					substr($checksum, 0, 2),
+					$img_w,
+					$img_h
+				));
+				
+				// crée une miniature de l’image
+				create_thumbnail($filepath);
+			}
+		}
+
+	} catch (Exception $e) {
+		$req->rollBack();
+		return 'Erreur 39787 ajout images du disque dans DB: '.$e->getMessage();
+	}
+}
 
 
 /* AJOUTE TOUS LES DOSSIERS DU TABLEAU $dossiers DANS UNE ARCHIVE ZIP */
@@ -30,10 +149,10 @@ function addFolder2zip($zip, $folder) {
 
 function creer_fichier_zip($dossiers) {
 	foreach($dossiers as $i => $dossier) {
-		$dossiers[$i] = '../'.str_replace(BT_ROOT, '', $dossier); // FIXME : find cleaner way for '../';
+		$dossiers[$i] = str_replace(BT_ROOT, '', $dossier); // FIXME : find cleaner way for '../';
 	}
 	$file = 'archive_site-'.date('Ymd').'-'.substr(md5(rand(10,99)),3,5).'.zip';
-	$filepath = str_replace(realpath($_SERVER['DOCUMENT_ROOT']), '', dirname(__DIR__)).'/'.str_replace(BT_ROOT, '', DIR_BACKUP).$file;
+	$filepath = str_replace(BT_ROOT, '', DIR_BACKUP).$file;
 
 	$zip = new ZipArchive;
 	if ($zip->open(DIR_BACKUP.$file, ZipArchive::CREATE) === TRUE) {
@@ -83,7 +202,7 @@ function creer_fichier_opml() {
 
 	// écriture du fichier
 	$file = 'backup-data-'.date('Ymd-His').'.opml';
-	$filepath = str_replace(realpath($_SERVER['DOCUMENT_ROOT']), '', dirname(__DIR__)).'/'.str_replace(BT_ROOT, '', DIR_BACKUP).$file;
+	$filepath = str_replace(BT_ROOT, '', DIR_BACKUP).$file;
 	return (file_put_contents(DIR_BACKUP.$file, $html) === FALSE) ? FALSE : $filepath;
 
 }
@@ -123,9 +242,8 @@ function importer_opml($opml_content) {
 	return (count($GLOBALS['liste_flux']) - $old_len);
 }
 
-
 // DEBUT PAGE
-afficher_html_head($GLOBALS['lang']['titre_maintenance']);
+afficher_html_head($GLOBALS['lang']['titre_maintenance'], "maintenance");
 afficher_topnav($GLOBALS['lang']['titre_maintenance'], ''); #top
 
 echo '<div id="axe">'."\n";
@@ -188,7 +306,7 @@ if (!isset($_GET['do']) and !isset($_FILES['file'])) {
 	echo '<form action="maintenance.php" method="post" enctype="multipart/form-data" class="bordered-formbloc" id="form_import">'."\n";
 		echo '<fieldset class="pref valid-center">';
 		echo '<legend class="legend-backup">'.$GLOBALS['lang']['maintenance_import'].'</legend>';
-		echo "\t".'<p>'.form_select_no_label('imp-format', $importformats, 'rssopml');
+		echo "\t".'<p>'.form_select_no_label('imp-format', $importformats, 'jsonbak');
 		echo '<input type="file" name="file" id="file" class="text" /></p>'."\n";
 		echo '</fieldset>'."\n";
 		echo '<p class="submit-bttns">'."\n";
@@ -204,11 +322,13 @@ if (!isset($_GET['do']) and !isset($_FILES['file'])) {
 		echo '<fieldset class="pref valid-center">';
 		echo '<legend class="legend-sweep">'.$GLOBALS['lang']['maintenance_optim'].'</legend>';
 
+		echo "\t".'<p>'.select_yes_no('opti-file', 0, $GLOBALS['lang']['bak_opti_miniature']).'</p>'."\n";
 		if (DBMS == 'sqlite') {
 			echo "\t".'<p>'.select_yes_no('opti-vacu', 0, $GLOBALS['lang']['bak_opti_vacuum']).'</p>'."\n";
 		} else {
 			echo hidden_input('opti-vacu', 0);
 		}
+		echo "\t".'<p>'.select_yes_no('opti-comm', 0, $GLOBALS['lang']['bak_opti_recountcomm']).'</p>'."\n";
 		echo "\t".'<p>'.select_yes_no('opti-rss', 0, $GLOBALS['lang']['bak_opti_supprreadrss']).'</p>'."\n";
 		echo '</fieldset>'."\n";
 		echo '<p class="submit-bttns">'."\n";
@@ -235,7 +355,19 @@ if (!isset($_GET['do']) and !isset($_FILES['file'])) {
 		// token : ok, go on !
 		if (isset($_GET['do'])) {
 			if ($_GET['do'] == 'export') {
-				if (@$_GET['exp-format'] == 'opml') {
+				// Export a ZIP archive
+				if (@$_GET['exp-format'] == 'zip') {
+					$dossiers = array();
+					if (isset($_GET['incl-sqlit'])) {
+						$dossiers[] = DIR_DATABASES;
+					}
+					if (isset($_GET['incl-confi'])) {
+						$dossiers[] = DIR_CONFIG;
+					}
+					$file_archive = creer_fichier_zip($dossiers);
+
+				// Export a OPML rss lsit
+				} elseif (@$_GET['exp-format'] == 'opml') {
 					$file_archive = creer_fichier_opml();
 
 				} else {
@@ -317,3 +449,4 @@ echo '</div>'."\n";
 echo "\n".'<script src="style/javascript.js" type="text/javascript"></script>'."\n";
 
 footer($begin);
+

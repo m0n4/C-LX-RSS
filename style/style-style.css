@@ -33,7 +33,7 @@
 
 @font-face {
   font-family: "icon";
-  src: url("icon.woff?17") format("woff");
+  src: url("icon.woff?23") format("woff");
 }
 
 
@@ -41,8 +41,8 @@
 ------------------------------------------------------------*/
 
 :root {
-	--md-primary-color: #263238; /* UI objects BG : top, etc. ; */
-	--md-secondary-color: #DB4437; /* UI items : FAB, buttons…; */
+	--md-primary-color: #3F51B5; /* UI objects BG : top, etc. ; */
+	--md-secondary-color: #FF4081; /* UI items : FAB, buttons…; */
 	--main-md-text-color: #ffffff;
 	--scnd-md-text-color: #ffffff;
 }
@@ -185,14 +185,17 @@ body {
 	z-index: 100;
 	color: white;
 	color: var(--main-md-text-color);
+	background: #263238;
+	background: var(--md-primary-color);
 	position: sticky;
 	top: 0;
-	box-shadow: 0 3px 8px 0 rgba(0,0,0,0.3);
+	box-shadow: 0 1px 3px 0 rgba(0,0,0,0.5)
+
 }
 
 #axe { /* the entire page without top bars (#header) and footer (#footer) */
 	padding: 20px;
-	max-width: 1600px;
+	/*max-width: 1600px;*/
 	margin: auto;
 }
 
@@ -317,13 +320,13 @@ q, blockquote {
 #top {
 	display: flex;
 	box-sizing: border-box;
-	background: #263238;
-	background: var(--md-primary-color);
 	align-items: center; /* vertical align*/
 	height: 64px;
 	padding: 8px;
+	background: inherit;
 }
 
+#top > #nav,
 #top > h1,
 #top > #search,
 #top > #notif-icon,
@@ -332,12 +335,116 @@ q, blockquote {
 	line-height: 48px;
 }
 
+/* TOP > Left nav bar
+------------------------------------------------------*/
+#top > #nav {
+	flex: 0 0 48px;
+}
+
+#top > #nav::before {
+	font-size: 1.6em;
+	text-align: center;
+	content: "\e906";
+	width: 48px;
+	cursor: pointer;
+	display: inline-block;
+	line-height: 48px;
+
+}
+
+/* TOP > Left nav bar > menu
+----------------------------------------*/
+#top > #nav > ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 20px;
+	box-sizing: border-box;
+	position: absolute;
+	line-height: 3;
+	background-color: white;
+	width: 340px;
+	left: 0;
+	transform: translateY(-700px);
+	top: 60px;
+	box-shadow: 0px 14px 24px rgba(0, 0, 0, 0.6);
+	opacity: 0;
+	border: 1px solid rgba(0,0,0,.2);
+	border-radius: 2px;
+}
+
+#top > #nav > ul::before {
+	content: "";
+	position: absolute;
+	padding: 7px;
+	top: -8px;
+	left: 23px;
+	border-left: 1px solid silver;
+	border-top: 1px solid silver;
+	transform: rotate(45deg);
+	background: inherit;
+}
+
+#top > #nav > ul.visible {
+	opacity: 1;
+	transform: translateY(0);
+	transition: opacity .2s ease-in;
+}
+
+#top > #nav > ul > li {
+	margin: 5px;
+	display: inline-block;
+	height: 70px;
+	width: 80px;
+	vertical-align: bottom;
+	line-height: 1;
+	text-align: center;
+	padding: 0 0 30px;
+	border: 2px solid transparent;
+	border-radius: 2px;
+}
+
+#top > #nav > ul > li:hover {
+	border-color: rgba(0, 0, 0, .1);
+}
+
+#top > #nav a {
+	margin: 0;
+	display: block;
+	text-decoration: none;
+	color: rgba(0, 0, 0, .6);
+	padding: 20px 0;
+	line-height: 30px;
+	font-size: .8em;
+	box-sizing: border-box;
+	overflow: hidden;
+
+}
+
+#nav a::before {
+	font-size: 3em;
+	display: block;
+	color: #aaa;
+	text-shadow: 1px 1px 0 black;
+}
+
+#nav #lien-liste:before    { content: "\e90d"; }
+#nav #lien-index:before    { content: "\e907"; }
+#nav #lien-nouveau:before  { content: "\e903"; }
+#nav #lien-lscom:before    { content: "\e91b"; }
+#nav #lien-fichiers:before { content: "\e921"; }
+#nav #lien-links:before    { content: "\e910"; }
+#nav #lien-notes:before    { content: "\e944"; }
+#nav #lien-rss:before      { content: "\e940"; }
+#nav #lien-agenda:before   { content: "\e918"; }
+
+
+
 
 /* TOP > H1 : title w/ link;
 ------------------------------------------------------*/
 #top > h1 {
 	flex: 1 0 auto;
-	padding-left: 16px;
+	padding-left: 8px;
 	margin: 0;
 	font-size: 1.3em;
 	font-weight: normal;
@@ -574,7 +681,8 @@ q, blockquote {
 	background: #fefefe;
 	color: #333;
 	position: relative;
-	z-index: -2
+	z-index: -2;
+	border-radius: 7px 7px 0 0;
 }
 
 #sub-menu #count-posts {
@@ -770,24 +878,21 @@ form {
 
 .text {
 	margin: 0;
-	padding: 10px 5px;
-	border: 0 solid transparent;
+	padding: 15px;
+	border: 1px solid transparent;
+	border-bottom-color: silver;
 	border-radius: 0;
 	background: white no-repeat;
-	background-image: linear-gradient(to bottom, #2196F3, #2196F3), linear-gradient(to bottom, silver, silver);
-	background-position: 0 100%, 100% 100%;
-	background-size: 0 2px, 100% 1px;
-	transition: background-size 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
 }
 
 .text:invalid {
 	box-shadow: none;
 	outline: none;
-	background-image: linear-gradient(to bottom, #f44336, #f44336), linear-gradient(to bottom, silver, silver);
+	border-bottom-color: red;
 }
 
 .text:focus {
-	background-size: 100% 2px, 100% 1px;
+	box-shadow: 0px 2px 5px silver;
 }
 
 
@@ -830,6 +935,7 @@ select optgroup::before {
 
 .submit-bttns .button-delete {
 	float: left;
+	min-width: 140px;
 }
 
 .submit {
@@ -987,7 +1093,7 @@ select optgroup::before {
 
 .checkbox-toggle:checked + label::after {
 	right: -50px;
-	background: #4285F4;
+	background: var(--md-secondary-color);
 }
 
 .checkbox-toggle+label::before {
@@ -1005,7 +1111,8 @@ select optgroup::before {
 }
 
 .checkbox-toggle:checked + label:before {
-	background: #A0C2F9;
+	background: var(--md-secondary-color);
+	opacity: .6
 }
 
 .checkbox-toggle:focus+label::after {
@@ -1066,8 +1173,14 @@ fieldset {
 *************************************/
 
 /* form writing */
+#apercu, #form-ecrire .main-form, #form-ecrire #date-and-opts,
+#graphs .graph,
+#post-new-lien, .linkbloc,
+.billets,
 #auth, #install,
+#form-image, #image-section, #files-section,
 #preferences > div, #preferences-captcha, #maintenance-form form,
+#post-nv-commentaire, .comm-main-frame,
 #form-rss-config .feed-item, #feed-list, #post-list,
 .notebloc, #post-new-note,
 #calendar, #events-section, #popup-wrapper, #popup, #daily-events

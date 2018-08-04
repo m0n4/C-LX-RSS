@@ -1,9 +1,10 @@
 <?php
 // *** LICENSE ***
+// oText is free software.
 //
-// This file is part of C60.
-// Since 2016, by Timo Van Neerden.
-// C60 is free software, under MIT/X11 Licence.
+// By Fred Nassar (2006) and Timo Van Neerden (since 2010)
+// See "LICENSE" file for info.
+// *** LICENSE ***
 
 require_once 'inc/boot.php';
 operate_session();
@@ -84,8 +85,9 @@ function afficher_form_prefs($erreurs = '') {
 		$fld_cfg_rss .= '<div class="form-legend"><legend class="legend-rss">'.$GLOBALS['lang']['prefs_legend_configrss'].'</legend></div>'."\n";
 		$fld_cfg_rss .= '<div class="form-lines">'."\n";
 		$fld_cfg_rss .= '<p>'."\n";
+		$a = explode('/', dirname($_SERVER['SCRIPT_NAME']));
 		$fld_cfg_rss .= '<label>'.$GLOBALS['lang']['pref_label_crontab_rss'].'</label>'."\n";
-		$fld_cfg_rss .= '<a onclick="prompt(\''.$GLOBALS['lang']['pref_alert_crontab_rss'].'\', \'0 *  *   *   *   wget --spider -qO- '.$GLOBALS['racine'].'_rss.ajax.php?guid='.BLOG_UID.'&refresh_all'.'\');return false;" href="#">Afficher ligne Cron</a>';
+		$fld_cfg_rss .= '<a onclick="prompt(\''.$GLOBALS['lang']['pref_alert_crontab_rss'].'\', \'0 *  *   *   *   wget --spider -qO- '.$GLOBALS['racine'].$a[count($a)-1].'/_rss.ajax.php?guid='.BLOG_UID.'&refresh_all'.'\');return false;" href="#">Afficher ligne Cron</a>';
 		$fld_cfg_rss .= '</p>'."\n";
 		$fld_cfg_rss .= '<p>'."\n";
 		$fld_cfg_rss .= "\t".'<label>'.$GLOBALS['lang']['pref_rss_go_to_imp-export'].'</label>'."\n";
@@ -126,7 +128,7 @@ if (isset($_POST['_verif_envoi'])) {
 }
 
 // DEBUT PAGE
-afficher_html_head($GLOBALS['lang']['preferences']);
+afficher_html_head($GLOBALS['lang']['preferences'], "preferences");
 afficher_topnav($GLOBALS['lang']['preferences'], ''); #top
 
 echo '<div id="axe">'."\n";

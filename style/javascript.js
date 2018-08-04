@@ -1,8 +1,9 @@
 // *** LICENSE ***
+// oText is free software.
 //
-// This file is part of C60.
-// Since 2016, by Timo Van Neerden.
-// C60 is free software, under MIT/X11 Licence.
+// By Fred Nassar (2006) and Timo Van Neerden (since 2010)
+// See "LICENSE" file for info.
+// *** LICENSE ***
 
 "use strict";
 
@@ -61,6 +62,7 @@ Date.dateFromYMDHIS = function(d) {
 }
 
 
+
 /*
 	menu icons : onclick.
 */
@@ -72,8 +74,8 @@ function closeOpenMenus(target) {
 	for (var i=0, len=openMenu.length ; i<len ; i++) {
 		if (!openMenu[i].parentNode.contains(target)) openMenu[i].classList.remove('visible');
 	}
-
 }
+
 window.addEventListener('click', function(e) {
 	var openMenu = document.querySelectorAll('#top > [id] > ul.visible');
 	// no open menus: abord
@@ -83,7 +85,7 @@ window.addEventListener('click', function(e) {
 });
 
 // add "click" listeners on the list of menus
-['nav-acc', 'notif-icon'].forEach(function(elem) {
+['nav', 'nav-acc', 'notif-icon'].forEach(function(elem) {
 	document.getElementById(elem).addEventListener('click', function(e) {
 		closeOpenMenus(e.target);
 		var menu = document.getElementById(elem).querySelector('ul');
@@ -92,12 +94,73 @@ window.addEventListener('click', function(e) {
 	});
 });
 
+
 /*
 	cancel button on forms.
 */
 function goToUrl(pagecible) {
 	window.location = pagecible;
 }
+
+/*
+	On article or comment writing: insert a BBCode Tag or a Unicode char.
+*/
+
+function insertTag(e, startTag, endTag) {
+	var seekField = e;
+	while (!seekField.classList.contains('formatbut')) {
+		seekField = seekField.parentNode;
+	}
+	while (!seekField.tagName || seekField.tagName != 'TEXTAREA') {
+		seekField = seekField.nextSibling;
+	}
+
+	var field = seekField;
+	var scroll = field.scrollTop;
+	field.focus();
+	var startSelection   = field.value.substring(0, field.selectionStart);
+	var currentSelection = field.value.substring(field.selectionStart, field.selectionEnd);
+	var endSelection     = field.value.substring(field.selectionEnd);
+	if (currentSelection == "") { currentSelection = "TEXT"; }
+	field.value = startSelection + startTag + currentSelection + endTag + endSelection;
+	field.focus();
+	field.setSelectionRange(startSelection.length + startTag.length, startSelection.length + startTag.length + currentSelection.length);
+	field.scrollTop = scroll;
+}
+
+function insertChar(e, ch) {
+	var seekField = e;
+	while (!seekField.classList.contains('formatbut')) {
+		seekField = seekField.parentNode;
+	}
+	while (!seekField.tagName || seekField.tagName != 'TEXTAREA') {
+		seekField = seekField.nextSibling;
+	}
+
+	var field = seekField;
+
+	var scroll = field.scrollTop;
+	field.focus();
+
+	var bef_cur = field.value.substring(0, field.selectionStart);
+	var aft_cur = field.value.substring(field.selectionEnd);
+	field.value = bef_cur + ch + aft_cur;
+	field.focus();
+	field.setSelectionRange(bef_cur.length + ch.toString.length +1, bef_cur.length + ch.toString.length +1);
+	field.scrollTop = scroll;
+}
+
+
+/*
+	Used in file upload: converts bytes to kB, MB, GB…
+*/
+function humanFileSize(bytes) {
+	var e = Math.log(bytes)/Math.log(1e3)|0,
+	nb = (e, bytes/Math.pow(1e3,e)).toFixed(1),
+	unit = (e ? 'KMGTPEZY'[--e] : '') + 'B';
+	return nb + ' ' + unit
+}
+
 
 
 /*
@@ -112,17 +175,13 @@ function switch_form(activeForm) {
 }
 
 function switch_export_type(activeForm) {
-	var e_json = document.getElementById('e_json');
-	var e_html = document.getElementById('e_html');
 	var e_zip = document.getElementById('e_zip');
-	e_json.style.display = e_html.style.display = e_zip.style.display = 'none';
+	e_zip.style.display = 'none';
 	document.getElementById(activeForm).style.display = 'block';
 }
 
 function hide_forms(blocs) {
 	var radios = document.getElementsByName(blocs);
-	var e_json = document.getElementById('e_json');
-	var e_html = document.getElementById('e_html');
 	var e_zip = document.getElementById('e_zip');
 	var checked = false;
 	for (var i = 0, length = radios.length; i < length; i++) {
@@ -133,28 +192,6 @@ function hide_forms(blocs) {
 	}
 }
 
-
-/* for links : hide the FAB button when focus on link field (more conveniant for mobile UX) */
-function hideFAB() {
-	if (document.getElementById('fab')) {
-		document.getElementById('fab').classList.add('hidden');
-	}
-}
-function unHideFAB() {
-	if (document.getElementById('fab')) {
-		document.getElementById('fab').classList.remove('hidden');
-	}
-}
-
-/* for several pages: eventlistener to show/hide FAB on scrolling (avoids FAB from beeing in the way) */
-function scrollingFabHideShow() {
-	if ((document.body.getBoundingClientRect()).top > scrollPos) {
-		unHideFAB();
-	} else {
-		hideFAB();
-	}
-	scrollPos = (document.body.getBoundingClientRect()).top;
-}
 
 
 /**************************************************************************************************************************************
@@ -238,6 +275,9 @@ function RssReader() {
 
 	var DateTimeFormat = new Intl.DateTimeFormat('fr', {weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "numeric"});
 
+	var d = new Date();
+	this.ymd000 = '' + d.getFullYear() + ('0' + (d.getMonth()+1)).slice(-2) + ('0' + d.getDate()).slice(-2) + '000000';
+
 
 	/***********************************
 	** The HTML tree builder :
@@ -259,53 +299,88 @@ function RssReader() {
 			var li = document.createElement("li");
 			li.id = 'i_'+item.id;
 			li.dataset.sitehash = item.feedhash;
+//			li.dataset.postdate = item.datetime;
 			if (0 === item.statut) { li.classList.add('read'); }
 
-			// li-head: title-block
-			var title = document.createElement("div");
-			title.classList.add('post-title');
+			// li-head: head-block
+			var postHead = document.createElement("div");
+			postHead.classList.add('post-head');
+
+			var favBtn = document.createElement("a");
+			favBtn.href = '#';
+			favBtn.classList.add("lien-fav");
+			favBtn.dataset.isFav = item.fav;
+			favBtn.dataset.favId = item.id;
+			favBtn.addEventListener('click', function(e){ _this.markAsFav(this); e.preventDefault(); } );
+			postHead.appendChild(favBtn);
 
 			// site name
 			var site = document.createElement("div");
 			site.classList.add('site');
 			site.appendChild(document.createTextNode(item.sitename));
-			title.appendChild(site);
+			postHead.appendChild(site);
 
+			// post folders labels
+			if (item.folder) {
+				var folder = document.createElement("div");
+				folder.classList.add('folder');
+				folder.appendChild(document.createTextNode(item.folder));
+				postHead.appendChild(folder);
+			}
+			
 			// post title
 			var titleLink = document.createElement("a");
 			titleLink.href = item.link;
 			titleLink.title = item.title;
+			titleLink.classList.add('post-title');
 			titleLink.target = "_blank";
 			titleLink.appendChild(document.createTextNode(item.title));
 			titleLink.dataset.id = li.id;
 			titleLink.addEventListener('click', function(e){ if(!_this.openThisItem(document.getElementById(this.dataset.id))) e.preventDefault(); } );
-			title.appendChild(titleLink);
+			postHead.appendChild(titleLink);
 
 			// post date
 			var date = document.createElement("div");
 			date.classList.add('date');
 			date.appendChild(document.createTextNode(DateTimeFormat.format(Date.dateFromYMDHIS(item.datetime))));
-			title.appendChild(date);
+			postHead.appendChild(date);
 
-			// post share link & fav link
+			// hover buttons (share link, tweet…)
 			var share = document.createElement("div");
 			share.classList.add('share');
+			// share, in linx
 			var shareLink = document.createElement("a");
-			shareLink.href = 'links.php?url='+item.link;
+			shareLink.href = 'links.php?url='+encodeURIComponent(item.link);
 			shareLink.target = "_blank";
 			shareLink.classList.add("lien-share");
 			share.appendChild(shareLink);
-			var favLink = document.createElement("a");
-			favLink.href = '#';
-			favLink.target = "_blank";
-			favLink.classList.add("lien-fav");
-			favLink.dataset.isFav = item.fav;
-			favLink.dataset.favId = item.id;
-			favLink.addEventListener('click', function(e){ _this.markAsFav(this); e.preventDefault(); } );
-			share.appendChild(favLink);
+			// open in new tab
+			var openLink = document.createElement("a");
+			openLink.href = item.link;
+			openLink.target = "_blank";
+			openLink.classList.add("lien-open");
+			share.appendChild(openLink);
+			// mail link
+			var mailLink = document.createElement("a");
+			mailLink.href = 'mailto:?&subject='+ encodeURIComponent(item.title) + '&body=' + encodeURIComponent(item.link);
+			mailLink.target = "_blank";
+			mailLink.classList.add("lien-mail");
+			share.appendChild(mailLink);
+			// tweet link
+			var tweetLink = document.createElement("a");
+			tweetLink.href = 'https://twitter.com/intent/tweet?text='+ encodeURIComponent(item.title) + '&amp;url=' + encodeURIComponent(item.link);
+			tweetLink.target = "_blank";
+			tweetLink.classList.add("lien-tweet");
+			share.appendChild(tweetLink);
+			// G+ link
+			var gplusLink = document.createElement("a");
+			gplusLink.href = 'https://plus.google.com/share?url=' + encodeURIComponent(item.link);
+			gplusLink.target = "_blank";
+			gplusLink.classList.add("lien-gplus");
+			share.appendChild(gplusLink);
 
-			title.appendChild(share);
-			li.appendChild(title);
+			postHead.appendChild(share);
+			li.appendChild(postHead);
 
 			// bloc with main content of feed in a comment (it’s uncomment when open, to defer media loading).
 			var content = document.createElement("div");
@@ -335,6 +410,7 @@ function RssReader() {
 	}
 	// init the whole DOM list
 	this.rebuiltTree(this.feedList);
+
 
 
 	/***********************************
@@ -421,6 +497,7 @@ function RssReader() {
 	}
 
 
+
 	/***********************************
 	** Methods to "sort" elements (by site, folder, favs…)
 	*/
@@ -441,7 +518,6 @@ function RssReader() {
 		this.openAllButton.classList.remove('unfold');
 		return false;
 	}
-
 
 	// create list of items matching the selected folder
 	this.sortItemsByFolder = function(theFolder) {
@@ -496,6 +572,27 @@ function RssReader() {
 	}
 
 
+	// Create list with today's posts
+	this.sortToday = function() {
+		var newList = new Array();
+		// create list of items that have been posted today
+
+		for (var i = 0, len = this.feedList.length ; i < len ; i++) {
+			if (this.feedList[i].datetime >= this.ymd000) {
+				newList.push(this.feedList[i]);
+			}
+		}
+		// unhighlight previously selected site
+		if (document.querySelector('.active-site')) { document.querySelector('.active-site').classList.remove('active-site'); }
+		// highlight favs
+		document.querySelector('.today-feeds').classList.add('active-site');
+		window.location.hash = '';
+		this.rebuiltTree(newList);
+		this.openAllButton.classList.remove('unfold');
+		return false;
+	}
+
+
 	/***********************************
 	** Methods to "mark as read" item in the local list and on screen
 	*/
@@ -516,10 +613,12 @@ function RssReader() {
 			for (var i = 0, len = this.feedList.length ; i < len ; i++) { this.feedList[i].statut = 0; }
 
 			// recount unread items in the list of sites/folders
-			for (var i = 0, liList = document.querySelectorAll('#feed-list li:not(.fav-feeds)'), len = liList.length ; i < len ; i++) {
-				liList[i].dataset.nbrun = 0;
-				liList[i].querySelector('.counter').firstChild.nodeValue = '(0)';
-			}
+//			for (var i = 0, liList = document.querySelectorAll('#feed-list li:not(.fav-feeds)'), len = liList.length ; i < len ; i++) {
+//				liList[i].dataset.nbrun = 0;
+//				liList[i].dataset.nbtoday = 0;
+//				liList[i].querySelector('.counter').firstChild.nodeValue = '(0)';
+//			}
+
 			this.sortAll();
 		}
 
@@ -530,26 +629,34 @@ function RssReader() {
 			// send XHR
 			if (!this.markAsReadXHR('folder', folder)) return false;
 
-			// update global counter by substracting unread items from the folder
-			var gcount = document.getElementById('global-post-counter');
-			gcount.dataset.nbrun -= markWhat.dataset.nbrun;
-			gcount.firstChild.nodeValue = '('+gcount.dataset.nbrun+')';
+			// update GLOBAL counter by substracting unread items from the folder
+
+//			var gcount = document.getElementById('global-post-counter');
+//			gcount.dataset.nbrun -= markWhat.dataset.nbrun;
+//			gcount.firstChild.nodeValue = '('+gcount.dataset.nbrun+')';
+
+			// update TODAY counter by substracting unread items from the folder
+//			var todayCount = document.getElementById('today-post-counter');
+//			todayCount.dataset.nbrun -= markWhat.dataset.nbtoday;
+//			todayCount.firstChild.nodeValue = '('+todayCount.dataset.nbrun+')';
+
+			// mark 0 for that folder
+			markWhat.dataset.nbrun = 0;
+//			markWhat.dataset.nbtoday = 0;
+//			markWhat.querySelector('.counter').firstChild.nodeValue = '(0)';
+
+			// mark 0 for the sites in that folder
+			var sitesInFolder = markWhat.querySelectorAll('ul > li');
+			for (var i = 0, len = sitesInFolder.length ; i < len ; i++) {
+				sitesInFolder[i].dataset.nbrun = 0;
+//				sitesInFolder[i].querySelector('.counter').firstChild.nodeValue = '(0)';
+			}
 
 			// mark items as read in list
 			for (var i = 0, len = this.feedList.length ; i < len ; i++) {
 				if (this.feedList[i].folder == folder) {
 					this.feedList[i].statut = 0;
 				}
-			}
-
-			// mark 0 for that folder folder’s unread counters
-			markWhat.dataset.nbrun = 0;
-			markWhat.querySelector('.counter').firstChild.nodeValue = '(0)';
-			// mark 0 for the sites in that folder also
-			var sitesInFolder = markWhat.querySelectorAll('ul > li');
-			for (var i = 0, len = sitesInFolder.length ; i < len ; i++) {
-				sitesInFolder[i].dataset.nbrun = 0;
-				sitesInFolder[i].querySelector('.counter').firstChild.nodeValue = '(0)';
 			}
 
 			this.sortItemsByFolder(folder);
@@ -563,16 +670,22 @@ function RssReader() {
 			// send XHR
 			if (!this.markAsReadXHR('site', site)) return false;
 
-			// update global counter by substracting unread items from the folder
+			// update global counter by substracting unread items from the site
 			var gcount = document.getElementById('global-post-counter');
 			gcount.dataset.nbrun -= markWhat.dataset.nbrun;
-			gcount.firstChild.nodeValue = '('+gcount.dataset.nbrun+')';
+//			gcount.firstChild.nodeValue = '('+gcount.dataset.nbrun+')';
+
+			// update TODAY counter by substracting unread items from the site
+//			var todayCount = document.getElementById('today-post-counter');
+//			todayCount.dataset.nbrun -= markWhat.dataset.nbtoday;
+//			todayCount.firstChild.nodeValue = '('+todayCount.dataset.nbrun+')';
 
 			// if site is in a folder, update amount of unread for that folder too
 			var parentFolder = markWhat.parentNode.parentNode;
 			if (parentFolder.dataset.folder) {
 				parentFolder.dataset.nbrun -= markWhat.dataset.nbrun;
-				parentFolder.querySelector('.counter').firstChild.nodeValue = '('+parentFolder.dataset.nbrun+')';
+//				parentFolder.dataset.nbtoday -= markWhat.dataset.nbtoday;
+//				parentFolder.querySelector('.counter').firstChild.nodeValue = '('+parentFolder.dataset.nbrun+')';
 			}
 
 			// mark items as read in list
@@ -583,13 +696,12 @@ function RssReader() {
 			}
 
 			// mark 0 for that folder folder’s unread counters
-			markWhat.dataset.nbrun = 0;
-			markWhat.querySelector('.counter').firstChild.nodeValue = '(0)';
+			markWhat.dataset.nbrun = markWhat.dataset.nbtoday = 0;
+//			markWhat.querySelector('.counter').firstChild.nodeValue = '(0)';
 
 			this.sortItemsBySite(siteHash);
 		}
 	}
-
 
 	// This is called when a post is opened (for the first time)
 	// counters are updated here
@@ -613,18 +725,27 @@ function RssReader() {
 		// decrement global counter
 		var gcount = document.getElementById('global-post-counter');
 		gcount.dataset.nbrun -= 1;
-		gcount.firstChild.nodeValue = '('+gcount.dataset.nbrun+')';
-		// decrement site
+//		gcount.firstChild.nodeValue = '('+gcount.dataset.nbrun+')';
+		// decrement site & site.today counter
 		var site = this.feedsList.querySelector('li[data-feed-hash="'+thePost.dataset.sitehash+'"]');
 		site.dataset.nbrun -= 1;
-		site.querySelector('.counter').firstChild.nodeValue = '('+site.dataset.nbrun+')';
+
+//		if (thePost.dataset.postdate >= this.ymd000) {
+//			site.dataset.nbtoday -= 1;
+//			var todayCount = document.getElementById('today-post-counter');
+//			todayCount.dataset.nbrun -= 1;
+//			todayCount.firstChild.nodeValue = '('+todayCount.dataset.nbrun+')';
+//		}
+
+//		site.querySelector('.counter').firstChild.nodeValue = '('+site.dataset.nbrun+')';
 		// decrement folder (if any)
 		var parentFolder = site.parentNode.parentNode;
 		if (parentFolder.dataset.folder) {
 			parentFolder.dataset.nbrun -= 1;
-			parentFolder.querySelector('.counter').firstChild.nodeValue = '('+parentFolder.dataset.nbrun+')';
+//			parentFolder.querySelector('.counter').firstChild.nodeValue = '('+parentFolder.dataset.nbrun+')';
 		}
 	}
+
 
 
 	/***********************************
@@ -633,6 +754,7 @@ function RssReader() {
 	// Mark as read by user input.
 	this.markAsReadXHR = function(marType, marWhat) {
 		loading_animation('on');
+
 		var notifDiv = document.createElement('div');
 
 		var xhr = new XMLHttpRequest();
@@ -664,7 +786,6 @@ function RssReader() {
 		return true;
 	}
 
-
 	// mark as read on page-unload (transparent for user)
 	this.markAsReadOnUnloadXHR = function() {
 		if (this.readQueue.urlList.length == 0) return true;
@@ -687,7 +808,6 @@ function RssReader() {
 		return true;
 	}
 
-
 	/***********************************
 	** Methods to mark a post a favorite
 	*/
@@ -697,7 +817,7 @@ function RssReader() {
 		thePost.dataset.isFav = 1 - parseInt(thePost.dataset.isFav);
 		var favCounter = document.getElementById('favs-post-counter')
 		favCounter.dataset.nbrun = parseInt(favCounter.dataset.nbrun) + ((thePost.dataset.isFav == 1) ? 1 : -1 );
-		favCounter.firstChild.nodeValue = '('+favCounter.dataset.nbrun+')';
+		//favCounter.firstChild.nodeValue = '('+favCounter.dataset.nbrun+')';
 
 		// mark as fav in local list
 		for (var i = 0, len = this.feedList.length ; i < len ; i++) {
@@ -743,6 +863,7 @@ function RssReader() {
 	}
 
 
+
 	/***********************************
 	** Methods to refresh the feeds
 	** This call is long, also it updates gradually on screen.
@@ -776,8 +897,10 @@ function RssReader() {
 		// when finished : displays amount of items gotten.
 		xhr.onload = function() {
 			var resp = this.responseText;
+
 			// grep new feeds
 			var newFeeds = JSON.parse(resp.substr(resp.indexOf("Success")+7));
+
 			// update status
 			_this.notifNode.firstChild.nodeValue = newFeeds.length+' new feeds'; // TODO $[lang]
 
@@ -787,7 +910,9 @@ function RssReader() {
 				for (var i = 0, len = newFeeds.length ; i < len ; i++) {
 					_this.feedList.unshift(newFeeds[i]); // TODO : recount elements (site, folder, total)
 				}
+
 			}
+
 			_refreshButton.dataset.refreshOngoing = 0;
 			loading_animation('off');
 			return false;
@@ -918,74 +1043,9 @@ function unMarkAsRemove(link) {
 }
 
 
-/**************************************************************************************************************************************
-	CANVAS FOR index.php GRAPHS
-**************************************************************************************************************************************/
-function respondCanvas(){
-	for (var i=0, len=containers.length; i<len ; i++) {
-		containers[i].querySelector('canvas').width = parseInt(containers[i].querySelector('.graphique').getBoundingClientRect().width);
-		draw(containers[i]);
-	}
-}
 
-function draw(container) {
-	var c = container.querySelector('canvas');
-	var months = container.querySelectorAll('.graphique .month');
-	var ctx = c.getContext("2d");
-	var cont = {
-		x:container.getBoundingClientRect().left,
-		y:container.getBoundingClientRect().top
-	};
 
-	// strokes the background lines at 0%, 25%, 50%, 75% and 100%.
-	ctx.beginPath();
-	for (var i=months.length-1 ; i>=0 ; i--) {
-		if (months[i].getBoundingClientRect().top < months[0].getBoundingClientRect().bottom) {
-			var topLeft = months[i].getBoundingClientRect().left -15;
-			break;
-		}
-	}
 
-	var coordScale = { x:topLeft, xx:months[1].getBoundingClientRect().left };
-	for (var i = 0; i < 5 ; i++) {
-		ctx.moveTo(coordScale.x, i*c.height/4 +1);
-		ctx.lineTo(coordScale.xx, i*c.height/4 +1);
-		ctx.strokeStyle = "rgba(0, 0, 0, .05)";
-	}
-	ctx.stroke();
 
-	// strokes the lines of the chart
-	ctx.beginPath();
-	for (var i=1, len=months.length ; i<len ; i++) {
-		var coordsNew = months[i].getBoundingClientRect();
-		if (i == 1) {
-			ctx.moveTo(coordsNew.left - cont.x + coordsNew.width/2, coordsNew.top - cont.y);
-		} else {
-			if (coordsNew.top - cont.y <= 150)
-			ctx.lineTo(coordsNew.left - cont.x + coordsNew.width/2, coordsNew.top - cont.y);
-		}
-	}
-	ctx.lineWidth = 2;
-	ctx.strokeStyle = "rgba(33,150,243,1)";
-	ctx.stroke();
-	ctx.closePath();
 
-	// fills the chart
-	ctx.beginPath();
-	for (var i=1, len=months.length ; i<len ; i++) {
-		var coordsNew = months[i].getBoundingClientRect();
-		if (i == 1) {
-			ctx.moveTo(coordsNew.left - cont.x + coordsNew.width/2, 150);
-			ctx.lineTo(coordsNew.left - cont.x + coordsNew.width/2, coordsNew.top - cont.y);
-		} else {
-			if (coordsNew.top - cont.y <= 150) {
-				ctx.lineTo(coordsNew.left - cont.x + coordsNew.width/2, coordsNew.top - cont.y);
-				var coordsOld = coordsNew;
-			}
-		}
-	}
-	ctx.lineTo(coordsOld.left - cont.x + coordsOld.width/2, 150);
-	ctx.fillStyle = "rgba(33,150,243,.2)";
-	ctx.fill();
-	ctx.closePath();
-}
+

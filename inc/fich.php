@@ -1,9 +1,10 @@
 <?php
 // *** LICENSE ***
+// oText is free software.
 //
-// This file is part of C60.
-// Since 2016, by Timo Van Neerden.
-// C60 is free software, under MIT/X11 Licence.
+// By Fred Nassar (2006) and Timo Van Neerden (since 2010)
+// See "LICENSE" file for info.
+// *** LICENSE ***
 
 // THIS FILE
 //
@@ -69,27 +70,72 @@ function fichier_prefs() {
 		$lang = (isset($_POST['langue']) and preg_match('#^[a-z]{2}$#', $_POST['langue'])) ? $_POST['langue'] : 'fr';
 		$auteur = addslashes(clean_txt(htmlspecialchars($_POST['auteur'])));
 		$email = addslashes(clean_txt(htmlspecialchars($_POST['email'])));
+		$nomsite = addslashes(clean_txt(htmlspecialchars($_POST['nomsite'])));
+		$description = addslashes(clean_txt(htmlspecialchars($_POST['description'])));
+		$keywords = addslashes(clean_txt(htmlspecialchars($_POST['keywords'])));
 		$racine = addslashes(trim(htmlspecialchars($_POST['racine'])));
+		$max_bill_acceuil = htmlspecialchars($_POST['nb_maxi']);
+		$max_bill_admin = htmlspecialchars($_POST['nb_list']);
+		$max_comm_admin = htmlspecialchars($_POST['nb_list_com']);
 		$format_date = htmlspecialchars($_POST['format_date']);
 		$format_heure = htmlspecialchars($_POST['format_heure']);
 		$fuseau_horaire = addslashes(clean_txt(htmlspecialchars($_POST['fuseau_horaire'])));
+		$global_com_rule = (isset($_POST['global_comments'])) ? '1' : '0';
+		$activer_categories = (isset($_POST['activer_categories'])) ? '1' : '0';
+		$theme_choisi = addslashes(clean_txt(htmlspecialchars($_POST['theme'])));
+		$comm_defaut_status = htmlspecialchars($_POST['comm_defaut_status']);
+		$automatic_keywords = (isset($_POST['auto_keywords'])) ? '1' : '0';
+		$require_email = (isset($_POST['require_email'])) ? '1' : '0';
+		$auto_check_updates = (isset($_POST['check_update'])) ? '1' : '0';
+		$auto_dl_liens_fichiers = htmlspecialchars($_POST['dl_link_to_files']);
+		$nombre_liens_admin = htmlspecialchars($_POST['nb_list_linx']);
 	} else {
 		$lang = (isset($_POST['langue']) and preg_match('#^[a-z]{2}$#', $_POST['langue'])) ? $_POST['langue'] : 'fr';
 		$auteur = addslashes(clean_txt(htmlspecialchars(USER_LOGIN)));
 		$email = 'mail@example.com';
+		$nomsite = 'Blogotext';
+		$description = addslashes(clean_txt($GLOBALS['lang']['go_to_pref']));
+		$keywords = 'blog, blogotext';
 		$racine = addslashes(clean_txt(trim(htmlspecialchars($_POST['racine']))));
+		$max_bill_acceuil = '10';
+		$max_bill_admin = '25';
+		$max_comm_admin = '50';
 		$format_date = '0';
 		$format_heure = '0';
 		$fuseau_horaire = 'UTC';
+		$global_com_rule = '0';
+		$activer_categories = '1';
+		$theme_choisi = 'default';
+		$comm_defaut_status = '1';
+		$automatic_keywords = '1';
+		$require_email = '0';
+		$auto_check_updates = 1;
+		$auto_dl_liens_fichiers = '0';
+		$nombre_liens_admin = '50';
 	}
 	$prefs = "<?php\n";
 	$prefs .= "\$GLOBALS['lang'] = '".$lang."';\n";
 	$prefs .= "\$GLOBALS['auteur'] = '".$auteur."';\n";
 	$prefs .= "\$GLOBALS['email'] = '".$email."';\n";
+	$prefs .= "\$GLOBALS['nom_du_site'] = '".$nomsite."';\n";
+	$prefs .= "\$GLOBALS['description'] = '".$description."';\n";
+	$prefs .= "\$GLOBALS['keywords'] = '".$keywords."';\n";
 	$prefs .= "\$GLOBALS['racine'] = '".$racine."';\n";
+	$prefs .= "\$GLOBALS['max_bill_acceuil'] = '".$max_bill_acceuil."';\n";
+	$prefs .= "\$GLOBALS['max_bill_admin'] = '".$max_bill_admin."';\n";
+	$prefs .= "\$GLOBALS['max_comm_admin'] = '".$max_comm_admin."';\n";
 	$prefs .= "\$GLOBALS['format_date'] = '".$format_date."';\n";
 	$prefs .= "\$GLOBALS['format_heure'] = '".$format_heure."';\n";
 	$prefs .= "\$GLOBALS['fuseau_horaire'] = '".$fuseau_horaire."';\n";
+	$prefs .= "\$GLOBALS['activer_categories']= '".$activer_categories."';\n";
+	$prefs .= "\$GLOBALS['theme_choisi']= '".$theme_choisi."';\n";
+	$prefs .= "\$GLOBALS['global_com_rule']= '".$global_com_rule."';\n";
+	$prefs .= "\$GLOBALS['comm_defaut_status']= '".$comm_defaut_status."';\n";
+	$prefs .= "\$GLOBALS['automatic_keywords']= '".$automatic_keywords."';\n";
+	$prefs .= "\$GLOBALS['require_email']= '".$require_email."';\n";
+	$prefs .= "\$GLOBALS['check_update']= '".$auto_check_updates."';\n";
+	$prefs .= "\$GLOBALS['max_linx_admin']= '".$nombre_liens_admin."';\n";
+	$prefs .= "\$GLOBALS['dl_link_to_files']= '".$auto_dl_liens_fichiers."';\n";
 	$prefs .= "?>";
 	if (file_put_contents($fichier_prefs, $prefs) === FALSE) {
 		return FALSE;
@@ -152,21 +198,6 @@ function fichier_htaccess($dossier) {
 }
 
 
-function liste_themes() {
-	if ( $ouverture = opendir(DIR_THEMES) ) {
-		while ($dossiers = readdir($ouverture) ) {
-			if ( file_exists(DIR_THEMES.$dossiers.'/list.html') ) {
-				$themes[$dossiers] = $dossiers;
-			}
-		}
-		closedir($ouverture);
-	}
-	if (isset($themes)) {
-		return $themes;
-	}
-}
-
-
 
 // à partir de l’extension du fichier, trouve le "type" correspondant.
 // les "type" et le tableau des extensions est le $GLOBALS['files_ext'] dans conf.php
@@ -217,7 +248,7 @@ function request_external_files($feeds, $timeout, $echo_progress=false) {
 					CURLOPT_SSL_VERIFYPEER => FALSE, // ignore SSL errors
 					CURLOPT_SSL_VERIFYHOST => FALSE, // ignore SSL errors
 					CURLOPT_ENCODING => "gzip", // take into account gziped pages
-					//CURLOPT_VERBOSE => 1,
+					CURLOPT_VERBOSE => 0,
 					CURLOPT_HEADER => 1, // also return header
 				));
 			curl_multi_add_handle($master, $curl_arr[$url]);
@@ -242,23 +273,18 @@ function request_external_files($feeds, $timeout, $echo_progress=false) {
 			$response = curl_multi_getcontent($curl_arr[$url]);
 			$header_size = curl_getinfo($curl_arr[$url], CURLINFO_HEADER_SIZE);
 			$results[$url]['headers'] = http_parse_headers(mb_strtolower(substr($response, 0, $header_size)));
-			$results[$url]['body'] = trim(substr($response, $header_size));
+
+			// get only header, trim it, remove invalid UTF8 chars (half bits, etc.).
+
+			//$results[$url]['body'] = iconv("UTF-8", "UTF-8//IGNORE", trim(substr($response, $header_size))); // deprecated, iconv uses a bugged lib
+			$results[$url]['body'] = mb_convert_encoding(trim(substr($response, $header_size)), 'UTF-8'); 
+
 		}
 		// Ferme les gestionnaires
 		curl_multi_close($master);
 	}
+
 	return $results;
-}
-
-
-function rafraichir_cache_lv1() {
-	creer_dossier(DIR_CACHE, 1);
-	creer_dossier(DIR_CACHE.'static/', 1);
-	$arr_a = liste_elements("SELECT * FROM articles WHERE bt_statut=1 ORDER BY bt_date DESC LIMIT 0, 20", array(), 'articles');
-	$arr_c = liste_elements("SELECT c.*, a.bt_title FROM commentaires AS c, articles AS a WHERE c.bt_statut=1 AND c.bt_article_id=a.bt_id ORDER BY c.bt_id DESC LIMIT 0, 20", array(), 'commentaires');
-	$arr_l = liste_elements("SELECT * FROM links WHERE bt_statut=1 ORDER BY bt_id DESC LIMIT 0, 20", array(), 'links');
-	$file = DIR_CACHE.'static/cache_rss_array.dat';
-	return file_put_contents($file, '<?php /* '.chunk_split(base64_encode(serialize(array('c' => $arr_c, 'a' => $arr_a, 'l' => $arr_l)))).' */');
 }
 
 
@@ -322,9 +348,10 @@ function refresh_rss($feeds) {
 
 
 function retrieve_new_feeds($feedlinks, $md5='') {
-	if (!$feeds = request_external_files($feedlinks, 25, true)) { // timeout = 25s
+	if (!$feeds = request_external_files($feedlinks, 15, true)) { // timeout = 25s
 		return FALSE;
 	}
+
 	$return = array();
 	foreach ($feeds as $url => $response) {
 		if (!empty($response['body'])) {
@@ -402,11 +429,20 @@ function feed2array($feed_content, $feedlink) {
 				}
 
 				// content
-				//if (!empty($item->subtitle)) {      $flux['items'][$c]['bt_content'] = (string)$item->subtitle; }
-				//if (!empty($item->summary)) {       $flux['items'][$c]['bt_content'] = (string)$item->summary; }
 				if (!empty($item->description)) {   $flux['items'][$c]['bt_content'] = (string)$item->description; }
 				if (!empty($item->content)) {       $flux['items'][$c]['bt_content'] = (string)$item->content; }
 				if (!empty($item->children('content', true)->encoded)) { $flux['items'][$c]['bt_content'] = (string)$item->children('content', true)->encoded; }
+
+				// SPECIAL CASES
+				//  for Youtube
+				if (strpos(parse_url($feedlink, PHP_URL_HOST), 'youtube.com') !== FALSE) {
+					$content = $item->children('media', true)->group->children('media', true)->description;
+					$yt_video_id = (string)$item->children('yt', true)->videoId;
+					if (!empty($yt_video_id) ) { $flux['items'][$c]['bt_content'] = '<iframe width="1120" height="630" src="https://www.youtube.com/embed/'.$yt_video_id.'?rel=0"></iframe>'; }
+					if (!empty($content) ) { $flux['items'][$c]['bt_content'] .= nl2br((string) $content); }
+				}
+
+
 				if (empty($flux['items'][$c]['bt_content'])) $flux['items'][$c]['bt_content'] = '-';
 
 				// place le lien du flux (on a besoin de ça)

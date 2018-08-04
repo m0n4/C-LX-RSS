@@ -1,47 +1,16 @@
 <?php
 // *** LICENSE ***
+// oText is free software.
 //
-// This file is part of C60.
-// Since 2016, by Timo Van Neerden.
-// C60 is free software, under MIT/X11 Licence.
+// By Fred Nassar (2006) and Timo Van Neerden (since 2010)
+// See "LICENSE" file for info.
+// *** LICENSE ***
 
 /* ##############################################################################################
    ----------------------------------------- Francais -----------------------------------------*/
 
 $GLOBALS['lang'] = array(
 'id'							=> 'fr',
-
-// Navigation
-'envoyer' 						=> 'Envoyer',
-'preview'						=> 'Prévisualiser',
-'rechercher' 					=> 'Rechercher',
-'succes'						=> 'Succès',
-'echec'							=> 'Échec',
-
-// Label avec " : "
-'label_dp_nom'					=> 'Nom : ',
-'label_dp_pseudo'				=> 'Pseudo : ',
-'label_dp_webpage'				=> 'Site web (facultatif) : ',
-'label_dp_captcha'				=> 'Somme de : ',
-'label_dp_email'				=> 'E-mail (facultatif) : ',
-'label_dp_email_required'		=> 'E-mail : ',
-
-// Mois & jours
-'months_fullname'				=> array('janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'),
-'months_abbr'					=> array('janv.','févr.','mars','avril','mai','juin','juil.','août','sept.','oct.','nov.','déc.'),
-'days_abbr'						=> array('lun.','mar.','mer.','jeu.','ven.','sam.','dim.'),
-'days_fullname'					=> array('lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'),
-'days_initials'					=> 'LMMJVSD',
-'aujourdhui'					=> 'aujourd’hui',
-'hier'							=> 'hier',
-
-// Erreurs
-'erreurs' 						=> 'Erreur(s)',
-'err_contenu' 					=> 'Le contenu est vide',
-'err_wrong_token'				=> 'Le jeton de sécurité est expiré ou invalide.',
-
-// placeholders
-'placeholder_search'			=> 'Rechercher',
 
 // Navigation
 'preferences'					=> 'Préférences',
@@ -52,11 +21,15 @@ $GLOBALS['lang'] = array(
 'editer' 						=> 'Éditer',
 'activer'	 					=> 'Activer',
 'desactiver'	 				=> 'Désactiver',
+'mesarticles' 					=> 'Mes articles',
+'mesliens'	 					=> 'Mes liens',
+'mesnotes'	 					=> 'Mes notes',
+'mesabonnements'				=> 'Mes abonnements',
+'monagenda'						=> 'Mon agenda',
 'nouveau' 						=> 'Nouvel article',
 'supprimer' 					=> 'Supprimer',
 'telecharger' 					=> 'Télécharger',
 'deconnexion' 					=> 'Déconnexion',
-'mesabonnements'				=> 'Mes abonnements',
 'oui' 							=> 'Oui',
 'non' 							=> 'Non',
 'ouverts' 						=> 'Autorisés',
@@ -84,19 +57,44 @@ $GLOBALS['lang'] = array(
 'first_edit' 					=> 'Éditez-moi',
 
 // Questions
+'question_suppr_article'		=> 'Cet article et ses commentaires seront définitivement supprimés !',
+'question_suppr_image'			=> 'Cette image sera définitivement supprimée !',
+'question_suppr_comment'		=> 'Ce commentaire sera définitivement supprimé !',
+'question_suppr_fichier'		=> 'Ce fichier sera définitivement supprimé !',
+'question_suppr_note'			=> 'Cette note sera définitivement supprimée !',
+'question_suppr_event'			=> 'Cet événement sera définitivement supprimé !',
 'question_quit_page'			=> 'Vos modifications n’ont pas été enregistrées. Quitter la page provoquera la perte des données.',
 'question_clean_rss'			=> 'Tous les articles lus seront supprimés de la BDD ?',
+'question_show_past_events'		=> 'Afficher les événnements passés ?',
+'question_entire_day'			=> 'Toute la journée ?',
 
 // Confirmations
+'confirm_article_suppr'			=> 'L’article a été supprimé.',
+'confirm_article_ajout'			=> 'L’article a été enregistré.',
+'confirm_article_maj'			=> 'L’article a été mis à jour.',
+'confirm_fichier_ajout'			=> 'Le fichier a été ajouté.',
+'confirm_fichier_suppr'			=> 'Le fichier a été supprimé.',
+'confirm_fichier_edit'			=> 'Les informations du fichier ont été éditées.',
 'confirm_prefs_maj'				=> 'Vos préférences ont été enregistrées.',
+'confirm_comment_ajout'			=> 'Votre commentaire a été ajouté.',
+'confirm_comment_suppr'			=> 'Le commentaire a été supprimé.',
+'confirm_comment_edit'			=> 'Le commentaire a été édité.',
+'confirm_comment_valid'			=> 'Le statut du commentaire a été modifié.',
+'confirm_link_ajout'			=> 'Le lien a été ajouté.',
+'confirm_link_suppr'			=> 'Le lien a été supprimé.',
+'confirm_link_edit'				=> 'Le lien a été édité.',
 'confirm_feed_update'			=> 'Les flux ont été mis à jour ',
 'confirm_feeds_edit'			=> 'Les flux ont été édités.',
 'confirm_feed_ajout'			=> 'Le flux a été ajouté.',
 'confirm_feed_clean'			=> 'Tous les anciens éléments ont été supprimés.',
+'confirm_note_enregistree'		=> 'Notes enregistrées.',
+'confirm_agenda_updated'		=> 'Agenda mis à jour.',
 
 // No-confirmation	
 'error_image_add'				=> 'Le fichier n’a pas pu être ajoutée',
 'error_phpajax'					=> 'Une erreur PHP/Ajax s’est produite :',
+'error_comment_suppr'			=> 'Le commentaire n’a pas été supprimé suite à une erreur.',
+'error_comment_valid'			=> 'Le statut du commentaire n’a pas été modifié suite à une erreur.',
 
 // Redirections
 'retour_liste'					=> '« Liste des articles',
@@ -104,6 +102,10 @@ $GLOBALS['lang'] = array(
 // Titres des pages
 'bienvenue'						=> 'Bienvenue',
 'titre_identification' 			=> 'Veuillez vous identifier',
+'titre_articles' 				=> 'Vos articles',
+'titre_ecrire' 					=> 'Écrire un nouvel article',
+'titre_maj' 					=> 'Mise à jour d’un article',
+'titre_commentaires' 			=> 'Commentaires',
 'titre_preferences' 			=> 'Préférences',
 'titre_fichier'					=> 'Fichiers',
 'titre_maintenance'				=> 'Maintenance',
@@ -163,24 +165,6 @@ $GLOBALS['lang'] = array(
 'placeholder_tags'				=> 'tags',
 'placeholder_url'				=> 'url',
 
-// Notes
-'note_no_note'					=> 'Aucune note',
-'note_no_event'					=> 'Aucune événement',
-'note_no_image'					=> 'Aucune image',
-'note_no_fichier'				=> 'Aucun fichier',
-'note_no_feed'					=> 'Aucun flux RSS',
-'note_no_feed_entry'			=> 'Aucune entrée RSS',
-'note_no_notifs'				=> 'Aucune notification',
-
-// Formulaire Images
-'label_jusqua'					=> 'Jusqu’à ',
-'label_parfichier'				=> ' par fichier',
-'label_codes'			    	=> 'Codes d’intégration :',
-'img_upload'					=> 'Envoyer',
-'img_specifier_url'				=> 'Spécifier une URL à la place',
-'img_upload_un_fichier'			=> 'Envoyer un seul fichier',
-'img_drop_files_here'			=> 'Déposez vos fichiers ici',
-
 // page backup
 'bak_succes_save'				=> 'Sauvegarde réussie',
 'maintenance_ask_do_what'		=> 'Que voulez-vous faire ?',
@@ -218,6 +202,7 @@ $GLOBALS['lang'] = array(
 
 // page RSS
 'rss_label_all_feeds'			=> 'Tous les flux',
+'rss_label_today_feeds'			=> 'Aujourd’hui',
 'rss_label_favs_feeds'			=> 'Favoris',
 'rss_label_refresh'				=> 'Recharger',
 'rss_label_markasread'			=> 'Marquer comme lu',
@@ -329,4 +314,70 @@ $GLOBALS['lang'] = array(
 'label_resume'					=> 'Résumé',
 'label_dl_fichier'				=> 'Également importer le fichier ? ',
 'label_all_comm_by_author'		=> 'Tous les commentaires de cet auteur',
+
+
+// Navigation
+'envoyer' 						=> 'Envoyer',
+'preview'						=> 'Prévisualiser',
+'rechercher' 					=> 'Rechercher',
+'succes'						=> 'Succès',
+'echec'							=> 'Échec',
+
+// Label avec " : "
+'label_dp_nom'					=> 'Nom : ',
+'label_dp_pseudo'				=> 'Pseudo : ',
+'label_dp_webpage'				=> 'Site web (facultatif) : ',
+'label_dp_captcha'				=> 'Somme de : ',
+'label_dp_email'				=> 'E-mail (facultatif) : ',
+'label_dp_email_required'		=> 'E-mail : ',
+
+// Commentaire
+'comment_ajout'					=> 'Ajouter un commentaire',
+'comment_cookie'				=> 'Retenir ces informations avec un cookie ? ',
+'comment_subscribe'				=> 'Recevoir des notifications de nouveaux commentaires par email ? ',
+'comment_not_allowed'			=> 'Les commentaires sont fermés pour cet article',
+'no_comments'					=> 'Il n’y a aucun commentaire pour le moment.',
+'comment_need_validation'		=> 'Votre commentaire sera visible après validation par le webmaster.',
+
+// Mois & jours
+'months_fullname'				=> array('janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'),
+'months_abbr'					=> array('janv.','févr.','mars','avril','mai','juin','juil.','août','sept.','oct.','nov.','déc.'),
+'days_abbr'						=> array('lun.','mar.','mer.','jeu.','ven.','sam.','dim.'),
+'days_fullname'					=> array('lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'),
+'days_initials'					=> 'LMMJVSD',
+'aujourdhui'					=> 'aujourd’hui',
+'hier'							=> 'hier',
+
+// Erreurs
+'erreurs' 						=> 'Erreur(s)',
+'err_contenu' 					=> 'Le contenu est vide',
+'err_theme_introuvable'			=> 'Le fichier thème est introuvable, incomplet ou illisible.',
+'err_comm_auteur'				=> 'Le nom de l’auteur est vide',
+'err_comm_email'				=> 'L’adresse e-mail n’est pas valide',
+'err_comm_contenu'				=> 'Le commentaire est vide',
+'err_comm_captcha'				=> 'La somme est incorrecte (utiliser des chiffres)',
+'err_comm_webpage'				=> 'L’URL n’est pas valide',
+'err_comm_article_id'			=> 'L’ID Article n’est pas valide',
+'err_wrong_token'				=> 'Le jeton de sécurité est expiré ou invalide.',
+
+// Notes
+'note_no_article'				=> 'Aucun article',
+'note_no_commentaire'			=> 'Aucun commentaire',
+'note_comment_closed'			=> 'Commentaires fermés',
+'note_no_link'					=> 'Aucun lien',
+
+// placeholders
+'placeholder_search'			=> 'Rechercher',
+
+'note_no_notifs'				=> 'Aucune notification',
+
+// Labels
+'label_code' 					=> 'code',
+'label_article'					=> 'article',
+'label_articles'				=> 'articles',
+'label_commentaire'				=> 'commentaire',
+'label_commentaires'			=> 'commentaires',
+'label_precedent'				=> 'éléments plus récents',
+'label_suivant'					=> 'éléments plus anciens',
+
 );

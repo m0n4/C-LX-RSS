@@ -4,8 +4,6 @@
 
 This is C-LX RSS Reader, a SQLite based RSS aggregator, by Timo van Neerden, since 2017.
 
-C-LX is originally based on [Blogotexts](https://github.com/BoboTiG/blogotext/) RSS reader.
-
 ![alt tag](screenshot.png?raw=true)
 
 ---

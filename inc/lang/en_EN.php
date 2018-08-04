@@ -1,47 +1,16 @@
 <?php
 // *** LICENSE ***
+// oText is free software.
 //
-// This file is part of C60.
-// Since 2016, by Timo Van Neerden.
-// C60 is free software, under MIT/X11 Licence.
+// By Fred Nassar (2006) and Timo Van Neerden (since 2010)
+// See "LICENSE" file for info.
+// *** LICENSE ***
 
 /* ##############################################################################################
    ----------------------------------------- Francais -----------------------------------------*/
 
 $GLOBALS['lang'] = array(
-'id'								=> 'en',
-
-// Navigation
-'envoyer' 							=> 'Send',
-'preview'							=> 'Preview',
-'rechercher' 						=> 'Search',
-'succes'							=> 'Success',
-'echec'								=> 'Fail',
-
-// Label avec ": "
-'label_dp_nom'						=> 'Name: ',
-'label_dp_pseudo'					=> 'Pseudo: ',
-'label_dp_webpage'					=> 'Website (optionnal): ',
-'label_dp_captcha'					=> 'Sum of: ',
-'label_dp_email'					=> 'E-mail (optionnal): ',
-'label_dp_email_required'			=> 'E-mail: ',
-
-// Mois & jours
-'months_fullname'					=> array('January','February','March','April','May','June','July','August','September','October','November','December'),
-'months_abbr'						=> array('Jan.','Feb.','Mar','Apr','May','June','July','Aug','Sept','Oct','Nov','Dec'),
-'days_abbr'							=> array('Mo','Tu','We','Th','Fr','Sa','Su'),
-'days_fullname'						=> array('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'),
-'days_initials'						=> 'MTWTFSS',
-'aujourdhui'						=> 'Today',
-'hier'								=> 'Yesterday',
-
-// Erreurs
-'erreurs' 							=> 'Error(s)',
-'err_contenu' 						=> 'Content is empty',
-'err_wrong_token'					=> 'Security coin is wrong.',
-
-// placeholders
-'placeholder_search'				=> 'Search',
+'id'							=> 'en',
 
 // Navigation
 'preferences'					=> 'Settings',
@@ -52,11 +21,15 @@ $GLOBALS['lang'] = array(
 'editer' 						=> 'Edit',
 'activer'	 					=> 'Activate',
 'desactiver'	 				=> 'Desactivate',
+'mesarticles' 					=> 'My articles',
+'mesliens'	 					=> 'My links',
+'mesnotes'	 					=> 'My notes',
+'mesabonnements'				=> 'My subscriptions',
+'monagenda'						=> 'My agenda',
 'nouveau' 						=> 'New article',
 'supprimer' 					=> 'Delete',
 'telecharger' 					=> 'Download',
 'deconnexion' 					=> 'Logout',
-'mesabonnements'				=> 'My subscriptions',
 'oui' 							=> 'Yes',
 'non' 							=> 'No',
 'ouverts' 						=> 'Open',
@@ -84,19 +57,44 @@ $GLOBALS['lang'] = array(
 'first_edit' 					=> 'Edit me',
 
 // Questions
+'question_suppr_article'		=> 'This article and its comments will be deleted!',
+'question_suppr_image'			=> 'This image will be deleted!',
+'question_suppr_comment'		=> 'This comment will be deleted!',
+'question_suppr_fichier'		=> 'This file will be deleted!',
+'question_suppr_note'			=> 'This note will be deleted!',
+'question_suppr_event'			=> 'This event will be deleted!',
 'question_quit_page'			=> 'Leaving this page will have your unsaved modifications lost. Ok?',
 'question_clean_rss'			=> 'All the read items will be removed from database, OK?',
+'question_show_past_events'		=> 'Display past events?',
+'question_entire_day'			=> 'Entire day?',
 
 // Confirmations
+'confirm_article_suppr'			=> 'Article has ben deleted',
+'confirm_article_ajout'			=> 'Article has been saved',
+'confirm_article_maj'			=> 'Article has been updated',
+'confirm_fichier_ajout'			=> 'File has been added',
+'confirm_fichier_suppr'			=> 'File has been removed',
+'confirm_fichier_edit'			=> 'File infos have been edited',
 'confirm_prefs_maj'				=> 'Settings have been saved',
+'confirm_comment_ajout'			=> 'Comment has been added',
+'confirm_comment_suppr'			=> 'Comment has been deleted',
+'confirm_comment_edit'			=> 'Comment has been edited',
+'confirm_comment_valid'			=> 'Comment status has been edited',
+'confirm_link_ajout'			=> 'Link has been added',
+'confirm_link_suppr'			=> 'Link has been removed',
+'confirm_link_edit'				=> 'Link has been updated',
 'confirm_feed_update'			=> 'The feeds have been updated',
 'confirm_feeds_edit'			=> 'The feeds have been edited.',
 'confirm_feed_ajout'			=> 'The feed has been added.',
 'confirm_feed_clean'			=> 'All old feeds have removed.',
+'confirm_note_enregistree'		=> 'Notes have been saved.',
+'confirm_agenda_updated'		=> 'Agenda has been updated.',
 
 // No-confirmation
 'error_image_add'				=> 'File could not have been added',
 'error_phpajax'					=> 'Some PHP/Ajax Error happened:',
+'error_comment_suppr'			=> 'The comment has not been deleted since an error happened.',
+'error_comment_valid'			=> 'The status has not been changed since an error happened.',
 
 // Redirections
 'retour_liste'					=> '« Articles list',
@@ -104,6 +102,10 @@ $GLOBALS['lang'] = array(
 // Titres des pages
 'bienvenue'						=> 'Welcome',
 'titre_identification' 			=> 'Identification',
+'titre_articles' 				=> 'Your articles',
+'titre_ecrire' 					=> 'Write a new article',
+'titre_maj' 					=> 'Update an article',
+'titre_commentaires' 			=> 'Comments',
 'titre_preferences' 			=> 'Seetings',
 'titre_fichier'					=> 'Files',
 'titre_maintenance'				=> 'Maintenance',
@@ -163,24 +165,6 @@ $GLOBALS['lang'] = array(
 'placeholder_tags'				=> 'tags',
 'placeholder_url'				=> 'url',
 
-// Notes
-'note_no_note'					=> 'No notes',
-'note_no_event'					=> 'No events',
-'note_no_image'					=> 'No images',
-'note_no_fichier'				=> 'No files',
-'note_no_feed'					=> 'No RSS feed',
-'note_no_feed_entry'			=> 'No RSS entry',
-'note_no_notifs'				=> 'No notification',
-
-//Formulaire Images
-'label_jusqua'					=> 'Up to',
-'label_parfichier'				=> ' per file',
-'label_codes'			    	=> 'Integration codes:',
-'img_upload'					=> 'Sens',
-'img_specifier_url'				=> 'From URL',
-'img_upload_un_fichier'			=> 'Upload one file',
-'img_drop_files_here'			=> 'Drop files here',
-
 // page backup
 'bak_succes_save'				=> 'Backup succeded',
 'maintenance_ask_do_what'		=> 'What do you want to do?',
@@ -218,6 +202,7 @@ $GLOBALS['lang'] = array(
 
 // page RSS
 'rss_label_all_feeds'			=> 'All feeds',
+'rss_label_today_feeds'			=> 'Today',
 'rss_label_favs_feeds'			=> 'Bookmarks',
 'rss_label_refresh'				=> 'Refresh',
 'rss_label_markasread'			=> 'Mark as read',
@@ -329,4 +314,68 @@ $GLOBALS['lang'] = array(
 'label_resume'					=> 'Home',
 'label_dl_fichier'				=> 'Also import file localy? ',
 'label_all_comm_by_author'		=> 'All comments by this author',
+
+
+// Navigation
+'envoyer' 							=> 'Send',
+'preview'							=> 'Preview',
+'rechercher' 						=> 'Search',
+'succes'							=> 'Success',
+'echec'								=> 'Fail',
+
+// Label avec ": "
+'label_dp_nom'						=> 'Name: ',
+'label_dp_pseudo'					=> 'Pseudo: ',
+'label_dp_webpage'					=> 'Website (optionnal): ',
+'label_dp_captcha'					=> 'Sum of: ',
+'label_dp_email'					=> 'E-mail (optionnal): ',
+'label_dp_email_required'			=> 'E-mail: ',
+
+// Commentaire
+'comment_ajout'						=> 'Write a comment',
+'comment_cookie'					=> 'Use a cookie to remember these informations? ',
+'comment_subscribe'					=> 'Get email notification by email? ',
+'comment_not_allowed'				=> 'Comments are closed for this entry.',
+'no_comments'						=> 'No comments yet.',
+'comment_need_validation'			=> 'Your comment will be visible after approbation by the webmaster.',
+
+// Mois & jours
+'months_fullname'					=> array('January','February','March','April','May','June','July','August','September','October','November','December'),
+'months_abbr'						=> array('Jan.','Feb.','Mar','Apr','May','June','July','Aug','Sept','Oct','Nov','Dec'),
+'days_abbr'							=> array('Mo','Tu','We','Th','Fr','Sa','Su'),
+'days_fullname'						=> array('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'),
+'days_initials'						=> 'MTWTFSS',
+'aujourdhui'						=> 'Today',
+'hier'								=> 'Yesterday',
+
+// Erreurs
+'erreurs' 							=> 'Error(s)',
+'err_contenu' 						=> 'Content is empty',
+'err_theme_introuvable'				=> 'Theme file is inreadable, not here or broken.',
+'err_comm_auteur'					=> 'Author name is empty',
+'err_comm_email'					=> 'Email is not correct',
+'err_comm_contenu'					=> 'Comment is empty',
+'err_comm_captcha'					=> 'Sum is wrong (use numbers)',
+'err_comm_webpage'					=> 'URL is wrong',
+'err_comm_article_id'				=> 'Article ID is wrong',
+'err_wrong_token'					=> 'Security coin is wrong.',
+
+// Notes
+'note_no_article'					=> 'No articles',
+'note_no_commentaire'				=> 'No comments',
+'note_comment_closed'				=> 'Comments are closed',
+'note_no_link'						=> 'No links',
+
+// placeholders
+'placeholder_search'				=> 'Search',
+
+'note_no_notifs'				=> 'No notification',
+// Labels
+'label_code' 						=> 'code',
+'label_article'						=> 'article',
+'label_articles'					=> 'articles',
+'label_commentaire'					=> 'comment',
+'label_commentaires'				=> 'comments',
+'label_precedent'					=> 'Newer entries',
+'label_suivant'						=> 'Older entries',
 );

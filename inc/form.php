@@ -1,9 +1,10 @@
 <?php
 // *** LICENSE ***
+// oText is free software.
 //
-// This file is part of C60.
-// Since 2016, by Timo Van Neerden.
-// C60 is free software, under MIT/X11 Licence.
+// By Fred Nassar (2006) and Timo Van Neerden (since 2010)
+// See "LICENSE" file for info.
+// *** LICENSE ***
 
 /// formulaires GENERIQUES //////////
 
@@ -147,3 +148,4 @@ function form_langue_install($label) {
 	$ret .= '</select></label>'."\n";
 	echo $ret;
 }
+

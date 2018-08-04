@@ -1,13 +1,10 @@
 <?php
 // *** LICENSE ***
+// oText is free software.
 //
-// This file is part of C60.
-// Since 2016, by Timo Van Neerden.
-// C60 is free software, under MIT/X11 Licence.
-
-function titre_url($title) {
-	return trim(diacritique($title), '-');
-}
+// By Fred Nassar (2006) and Timo Van Neerden (since 2010)
+// See "LICENSE" file for info.
+// *** LICENSE ***
 
 // remove slashes if necessary
 function clean_txt($text) {
@@ -36,15 +33,10 @@ function diacritique($texte) {
 	return $texte;
 }
 
-function rel2abs_admin($article) {
-	// if relative URI in path, make absolute paths (since /admin/ panel is 1 lv deeper) for href/src.
-	$article = preg_replace('#(src|href)=\"(?!(/|[a-z]+://))#i','$1="../', $article);
-	return $article;
-}
 
-function date_formate($id, $format_force='') {
+function date_formate($d, $format_force='') {
 	$retour ='';
-	$date= decode_id($id);
+	$date= decode_id($d);
 	$jour_l = jour_en_lettres($date['jour'], $date['mois'], $date['annee']);
 	$mois_l = mois_en_lettres($date['mois']);
 		$format = array (
@@ -67,8 +59,8 @@ function date_formate($id, $format_force='') {
 	return ucfirst($retour);
 }
 
-function heure_formate($id, $format_force='') {
-	$date = decode_id($id);
+function heure_formate($d, $format_force='') {
+	$date = decode_id($d);
 	$timestamp = mktime($date['heure'], $date['minutes'], $date['secondes'], $date['mois'], $date['jour'], $date['annee']);
 	$format = array (
 		'0' => date('H\:i\:s',$timestamp),	// 23:56:04
@@ -85,8 +77,8 @@ function heure_formate($id, $format_force='') {
 	return $retour;
 }
 
-function date_formate_iso($id) {
-	$date = decode_id($id);
+function date_formate_iso($d) {
+	$date = decode_id($d);
 	$timestamp = mktime($date['heure'], $date['minutes'], $date['secondes'], $date['mois'], $date['jour'], $date['annee']);
 	$date_iso = date('c', $timestamp);
 	return $date_iso;
@@ -96,6 +88,7 @@ function date_formate_iso($id) {
 function return_bytes($val) {
 	$val = trim($val);
 	$prefix = strtolower($val[strlen($val)-1]);
+	$val = (int)$val;
 	switch($prefix) {
 		case 'g': $val *= 1024;
 		case 'm': $val *= 1024;

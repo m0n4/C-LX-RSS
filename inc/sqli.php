@@ -1,9 +1,10 @@
 <?php
 // *** LICENSE ***
+// oText is free software.
 //
-// This file is part of C60.
-// Since 2016, by Timo Van Neerden.
-// C60 is free software, under MIT/X11 Licence.
+// By Fred Nassar (2006) and Timo Van Neerden (since 2010)
+// See "LICENSE" file for info.
+// *** LICENSE ***
 
 /*  Creates a new BlogoText base.
     if file does not exists, it is created, as well as the tables.
@@ -31,6 +32,7 @@ function create_tables() {
 			bt_bookmarked TINYINT,
 			bt_folder TEXT
 		); CREATE INDEX $if_not_exists dateidR ON rss ( bt_date, bt_id$index_limit_size );";
+
 	/*
 	* SQLite
 	*
@@ -151,8 +153,6 @@ function get_entry($table, $entry, $id, $retour_mode) {
 
 
 
-
-
 /* FOR COMMENTS : RETUNS nb_com per author */
 function nb_entries_as($table, $what) {
 	$result = array();
@@ -164,7 +164,6 @@ function nb_entries_as($table, $what) {
 		die('Erreur 0349 : '.$e->getMessage());
 	}
 }
-
 
 
 /* Enregistre le flux dans une BDD.
@@ -224,7 +223,9 @@ function rss_list_guid() {
 /* FOR RSS : RETUNS nb of articles per feed */
 function rss_count_feed() {
 	$result = array();
-	$query = "SELECT bt_feed, SUM(bt_statut) AS nbrun, SUM(bt_bookmarked) AS nbfav FROM rss GROUP BY bt_feed";
+	$query = "SELECT bt_feed, SUM(bt_statut) AS nbrun, SUM(bt_bookmarked) AS nbfav, SUM(CASE WHEN bt_date >= 20180527000000 AND bt_statut = 1 THEN 1 ELSE 0 END) AS nbtoday FROM rss GROUP BY bt_feed";
+
+	//$query = "SELECT bt_feed, SUM(bt_statut) AS nbrun, SUM(bt_bookmarked) AS nbfav FROM rss GROUP BY bt_feed";
 	try {
 		$result = $GLOBALS['db_handle']->query($query)->fetchAll(PDO::FETCH_ASSOC);
 		return $result;

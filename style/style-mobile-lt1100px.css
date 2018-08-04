@@ -1,0 +1,11 @@
+
+@media (max-width: 1100px) {
+	/* liste billets */
+	.billets { width: 100%; }
+	/* préférences */
+	#preferences p {
+		max-width: 100%;
+	}
+}
+
+

@@ -1,9 +1,11 @@
 <?php
 // *** LICENSE ***
+// oText is free software.
 //
-// This file is part of C60.
-// Since 2016, by Timo Van Neerden.
-// C60 is free software, under MIT/X11 Licence.
+// By Fred Nassar (2006) and Timo Van Neerden (since 2010)
+// See "LICENSE" file for info.
+// *** LICENSE ***
+
 
 if (!defined('IS_IT_INSTALL')) {
 	if ( !file_exists('config/user.ini') || !file_exists('config/prefs.php') ) {
@@ -12,17 +14,21 @@ if (!defined('IS_IT_INSTALL')) {
 	}
 }
 
+
+// it's not for 0.00000002 sec ...
 $begin = microtime(true);
 
 // Use UTF-8 for all
 mb_internal_encoding('UTF-8');
+mb_substitute_character('none');
+
 
 define('IS_IN_ADMIN', true);
 define('BT_ROOT_ADMIN', dirname(dirname(dirname(__file__))).'/');
 define('BT_ROOT', dirname(dirname(__file__)).'/');
-
 // if dev mod
 error_reporting(-1);
+
 
 /**
  * Import several .ini config files with this function
@@ -64,12 +70,11 @@ define('FILE_SETTINGS_ADV', DIR_CONFIG.'config-advanced.ini');
 define('FILE_MYSQL', DIR_CONFIG.'mysql.ini');
 
 // Constants: general
-define('BLOGOTEXT_NAME', 'CLX');
-define('BLOGOTEXT_SITE', 'https://github.com/timovn/C-LX-RSS');
-define('BLOGOTEXT_VERSION', '0.0.1-171217');
+define('BLOGOTEXT_NAME', 'CLX-RSS');
+define('BLOGOTEXT_SITE', 'https://lehollandaisvolant.net/');
+define('BLOGOTEXT_VERSION', '1808-1');
 define('MINIMAL_PHP_REQUIRED_VERSION', '5.5');
-define('BLOGOTEXT_UA', 'Mozilla/5.0 (X11; Linux x86_64; rv:57.0) Gecko/20100101 Firefox/57.0');
-
+define('BLOGOTEXT_UA', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0');
 
 // ADVANCED CONFIG OPTIONS
 import_ini_file(FILE_SETTINGS_ADV);
@@ -102,3 +107,5 @@ require_once BT_ROOT.'inc/sqli.php';
 if (!defined('IS_IT_INSTALL')) {
 	$GLOBALS['db_handle'] = open_base();
 }
+
+
