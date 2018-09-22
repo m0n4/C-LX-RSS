@@ -66,7 +66,7 @@ function afficher_topnav($titre, $html_sub_menu) {
 	$html .= "\t".'<div id="nav-acc">'."\n";
 	$html .= "\t\t".'<ul>'."\n";
 	$html .= "\t\t\t".'<li><a href="preferences.php" id="lien-preferences">'.$GLOBALS['lang']['preferences'].'</a></li>'."\n";
-	$html .= "\t\t\t".'<li><a href="'.$GLOBALS['racine'].'" id="lien-site">'.$GLOBALS['lang']['lien_blog'].'</a></li>'."\n";
+	$html .= "\t\t\t".'<li><a href="index.php" id="lien-site">'.$GLOBALS['lang']['lien_blog'].'</a></li>'."\n";
 	$html .= "\t\t\t".'<li><a href="logout.php" id="lien-deconnexion">'.$GLOBALS['lang']['deconnexion'].'</a></li>'."\n";
 	$html .= "\t\t".'</ul>'."\n";
 	$html .= "\t".'</div>'."\n";
