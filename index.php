@@ -60,7 +60,7 @@ function feed_list_html() {
 		$folder_count_today = 0;
 		foreach ($folder as $j => $feed) {
 			$li_html .= "\t\t\t\t".'<li class="feed-site" data-nbrun="'.$feed['nbrun'].'" data-feed-hash="'.crc32($feed['link']).'" title="'.$feed['link'].'">';
-			$li_html .= '<a href="#" '.(($feed['iserror'] > 2) ? 'class="feed-error" ': '' ).'onclick="return RssWall.sortItemsBySite(\''.crc32($feed['link']).'\');" style="background-image: url('.URL_ROOT.'favatar.php?w=favicon&amp;q='.parse_url($feed['link'], PHP_URL_HOST).')">'.htmlspecialchars($feed['title']).'</a>';
+			$li_html .= '<a href="#" '.(($feed['iserror'] > 2) ? 'class="feed-error" ': '' ).'onclick="return RssWall.sortItemsBySite(\''.crc32($feed['link']).'\');" style="background-image: url(favatar.php?w=favicon&amp;q='.parse_url($feed['link'], PHP_URL_HOST).')">'.htmlspecialchars($feed['title']).'</a>';
 			$li_html .= '</li>'."\n";
 			$folder_count += $feed['nbrun'];
 		}
