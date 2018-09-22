@@ -349,11 +349,11 @@ function RssReader() {
 			var share = document.createElement("div");
 			share.classList.add('share');
 			// share, in linx
-			var shareLink = document.createElement("a");
-			shareLink.href = 'links.php?url='+encodeURIComponent(item.link);
-			shareLink.target = "_blank";
-			shareLink.classList.add("lien-share");
-			share.appendChild(shareLink);
+			// var shareLink = document.createElement("a");
+			// shareLink.href = 'links.php?url='+encodeURIComponent(item.link);
+			// shareLink.target = "_blank";
+			// shareLink.classList.add("lien-share");
+			// share.appendChild(shareLink);
 			// open in new tab
 			var openLink = document.createElement("a");
 			openLink.href = item.link;
@@ -373,11 +373,11 @@ function RssReader() {
 			tweetLink.classList.add("lien-tweet");
 			share.appendChild(tweetLink);
 			// G+ link
-			var gplusLink = document.createElement("a");
-			gplusLink.href = 'https://plus.google.com/share?url=' + encodeURIComponent(item.link);
-			gplusLink.target = "_blank";
-			gplusLink.classList.add("lien-gplus");
-			share.appendChild(gplusLink);
+			// var gplusLink = document.createElement("a");
+			// gplusLink.href = 'https://plus.google.com/share?url=' + encodeURIComponent(item.link);
+			// gplusLink.target = "_blank";
+			// gplusLink.classList.add("lien-gplus");
+			// share.appendChild(gplusLink);
 
 			postHead.appendChild(share);
 			li.appendChild(postHead);
