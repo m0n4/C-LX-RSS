@@ -18,7 +18,7 @@ if (isset($_POST['nom_utilisateur'])) {
 	$ip = htmlspecialchars($_SERVER["REMOTE_ADDR"]);
 	// Proxy IPs, if exists.
 	$ip .= (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) ? '_'.htmlspecialchars($_SERVER['HTTP_X_FORWARDED_FOR']) : '';
-	$data = '<?php // '.date('r').' - '.$ip.' - '.((valider_form()===TRUE) ? 'login succes' : 'login failed for '. '“'.htmlspecialchars($_POST['nom_utilisateur']).'”') ."\n";
+	$data = time().' - '.date('r').' - '.$ip.' - '.((valider_form()===TRUE) ? 'login succes' : 'login failed for '. '“'.htmlspecialchars($_POST['nom_utilisateur']).'”') ."\n";
 	file_put_contents(DIR_LOG.'xauthlog.php', $data, FILE_APPEND);
 }
 
