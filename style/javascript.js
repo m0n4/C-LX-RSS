@@ -981,7 +981,7 @@ function RssReader() {
 
 
 	/***********************************
-	** Method to add a new feed (promt for URL and send to server)
+	** Method to add a new feed (prompt for URL and send to server)
 	*/
 	this.addNewFeed = function() {
 		var newLink = window.prompt(BTlang.rssJsAlertNewLink, '');
@@ -1008,6 +1008,7 @@ function RssReader() {
 			// recharge la page en cas de succès
 			loading_animation('off');
 			_this.notifNode.appendChild(document.createTextNode('FLux ajouté, rechargez la page.'));
+			document.getElementById('fab').style.display = 'none';
 			return false;
 		};
 
