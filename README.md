@@ -30,6 +30,7 @@ C-LX RSS is juste another, single user, web-based, RSS Reader. It comes with OPM
  * PHP GD module (for favicons);
  * PHP cURL module
  * PHP LibXML module
+ * PHP sqlite3 module
 
 ---
 
