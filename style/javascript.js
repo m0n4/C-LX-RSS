@@ -984,11 +984,11 @@ function RssReader() {
 	** Method to add a new feed (prompt for URL and send to server)
 	*/
 	this.addNewFeed = function() {
-		var newLink = window.prompt(BTlang.rssJsAlertNewLink, '');
+		var newLink = window.prompt(BTlang.rssJsAlertNewLink, '').trim();
 		// if empty string : stops here
 		if (!newLink) return false;
 		// ask folder
-		var newFolder = window.prompt(BTlang.rssJsAlertNewLinkFolder, '');
+		var newFolder = window.prompt(BTlang.rssJsAlertNewLinkFolder, '').trim();
 
 		var notifDiv = document.createElement('div');
 		loading_animation('on');
