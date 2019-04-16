@@ -23,9 +23,8 @@ function diacritique($texte) {
 	$texte = strip_tags($texte);
 	$texte = html_entity_decode($texte, ENT_QUOTES, 'UTF-8'); // &eacute => é ; é => é ; (uniformize)
 	$texte = htmlentities($texte, ENT_QUOTES, 'UTF-8'); // é => &eacute;
-	$texte = preg_replace('#&(.)(acute|grave|circ|uml|cedil|tilde|ring|slash|caron);#', '$1', $texte); // &eacute => e
+	$texte = preg_replace('#&([a-z]{1,2})(acute|grave|circ|uml|cedil|tilde|ring|slash|caron|lig);#', '$1', $texte); // &eacute => e
 	$texte = preg_replace('#(\t|\n|\r)#', ' ' , $texte); // \n, \r => spaces
-	$texte = preg_replace('#&([a-z]{2})lig;#i', '$1', $texte); // œ => oe ; æ => ae
 	$texte = preg_replace('#&[\w\#]*;#U', '', $texte); // remove other entities like &quote, &nbsp.
 	$texte = preg_replace('#[^\w -]#U', '', $texte); // keep only ciffers, letters, spaces, hyphens.
 	$texte = strtolower($texte); // to lower case
@@ -33,22 +32,40 @@ function diacritique($texte) {
 	return $texte;
 }
 
+function rel2abs_admin($article) {
+	// transforms SRCSET to SRC (too complicated to regex the hell out of that)
+	$article = preg_replace('#(srcset=(\'|")?([^="\'\s]+))#i','src=$2$3$2 data-$0', $article);
+
+	// if relative URI in path, make absolute paths (since /admin/ panel is 1 lv deeper) for href/src.
+	$article = preg_replace('#(src|href)=\"(?!(/|[a-z]+://))#i','$1="../', $article);
+
+	//debug(preg_last_error());
+	return $article;
+}
+
+
+
+// for href (for security reasons, the data is cleaned before injecting in html)
+function clean_href($matches) {
+	return '<a href="'.addslashes($matches[2]).'">'.$matches[1].'</a>';
+}
+
 
 function date_formate($d, $format_force='') {
 	$retour ='';
 	$date= decode_id($d);
-	$jour_l = jour_en_lettres($date['jour'], $date['mois'], $date['annee']);
-	$mois_l = mois_en_lettres($date['mois']);
+	$jour_l = jour_en_lettres($date['d'], $date['m'], $date['y']);
+	$mois_l = mois_en_lettres($date['m']);
 		$format = array (
-			'0' => $date['jour'].'/'.$date['mois'].'/'.$date['annee'],         // 14/01/1983
-			'1' => $date['mois'].'/'.$date['jour'].'/'.$date['annee'],         // 01/14/1983
-			'2' => $date['jour'].' '.$mois_l.' '.$date['annee'],               // 14 janvier 1983
-			'3' => $jour_l.' '.$date['jour'].' '.$mois_l.' '.$date['annee'],   // vendredi 14 janvier 1983
-			'4' => $jour_l.' '.$date['jour'].' '.$mois_l,                      // vendredi 14 janvier
-			'5' => $mois_l.' '.$date['jour'].', '.$date['annee'],              // janvier 14, 1983
-			'6' => $jour_l.', '.$mois_l.' '.$date['jour'].', '.$date['annee'], // vendredi, janvier 14, 1983
-			'7' => $date['annee'].'-'.$date['mois'].'-'.$date['jour'],         // 1983-01-14
-			'8' => substr($jour_l,0,3).'. '.$date['jour'].' '.$mois_l,         // ven. 14 janvier
+			'0' => $date['d'].'/'.$date['m'].'/'.$date['y'],            // 14/01/1983
+			'1' => $date['m'].'/'.$date['d'].'/'.$date['y'],            // 01/14/1983
+			'2' => $date['d'].' '.$mois_l.' '.$date['y'],               // 14 janvier 1983
+			'3' => $jour_l.' '.$date['d'].' '.$mois_l.' '.$date['y'],   // vendredi 14 janvier 1983
+			'4' => $jour_l.' '.$date['d'].' '.$mois_l,                  // vendredi 14 janvier
+			'5' => $mois_l.' '.$date['d'].', '.$date['y'],              // janvier 14, 1983
+			'6' => $jour_l.', '.$mois_l.' '.$date['d'].', '.$date['y'], // vendredi, janvier 14, 1983
+			'7' => $date['y'].'-'.$date['m'].'-'.$date['d'],            // 1983-01-14
+			'8' => substr($jour_l,0,3).'. '.$date['d'].' '.$mois_l,     // ven. 14 janvier
 		);
 
 	if ($format_force != '') {
@@ -61,7 +78,7 @@ function date_formate($d, $format_force='') {
 
 function heure_formate($d, $format_force='') {
 	$date = decode_id($d);
-	$timestamp = mktime($date['heure'], $date['minutes'], $date['secondes'], $date['mois'], $date['jour'], $date['annee']);
+	$timestamp = mktime($date['h'], $date['i'], $date['s'], $date['m'], $date['d'], $date['y']);
 	$format = array (
 		'0' => date('H\:i\:s',$timestamp),	// 23:56:04
 		'1' => date('H\:i',$timestamp),		// 23:56
@@ -79,9 +96,7 @@ function heure_formate($d, $format_force='') {
 
 function date_formate_iso($d) {
 	$date = decode_id($d);
-	$timestamp = mktime($date['heure'], $date['minutes'], $date['secondes'], $date['mois'], $date['jour'], $date['annee']);
-	$date_iso = date('c', $timestamp);
-	return $date_iso;
+	return date('c', mktime($date['h'], $date['i'], $date['s'], $date['m'], $date['d'], $date['y']));
 }
 
 // From a filesize (like "20M"), returns a size in bytes.

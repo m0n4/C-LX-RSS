@@ -13,19 +13,81 @@ $GLOBALS['lang'] = array(
 'id'							=> 'fr',
 
 // Navigation
+'envoyer' 						=> 'Envoyer',
+'preview'						=> 'Prévisualiser',
+'rechercher' 					=> 'Rechercher',
+'succes'						=> 'Succès',
+'echec'							=> 'Échec',
+'annuler'	 					=> 'Annuler',
+
+// Label avec " : "
+'label_dp_nom'					=> 'Nom : ',
+'label_dp_pseudo'				=> 'Pseudo : ',
+'label_dp_webpage'				=> 'Site web (facultatif) : ',
+'label_dp_captcha'				=> 'Somme de : ',
+'label_dp_email'				=> 'E-mail (facultatif) : ',
+'label_dp_email_required'		=> 'E-mail : ',
+
+// Mois & jours
+'months_fullname'				=> array('janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'),
+'months_abbr'					=> array('janv.','févr.','mars','avril','mai','juin','juil.','août','sept.','oct.','nov.','déc.'),
+'days_abbr'						=> array('lun.','mar.','mer.','jeu.','ven.','sam.','dim.'),
+'days_abbr_narrow'				=> array('L','M','M','J','V','S','D'),
+'days_fullname'					=> array('lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'),
+'aujourdhui'					=> 'aujourd’hui',
+'hier'							=> 'hier',
+'demain'						=> 'demain',
+
+// Erreurs
+'erreurs' 						=> 'Erreur(s)',
+'err_contenu' 					=> 'Le contenu est vide',
+'err_theme_introuvable'			=> 'Le fichier thème est introuvable, incomplet ou illisible.',
+'err_comm_auteur'				=> 'Le nom de l’auteur est vide',
+'err_comm_email'				=> 'L’adresse e-mail n’est pas valide',
+'err_comm_contenu'				=> 'Le commentaire est vide',
+'err_comm_captcha'				=> 'La somme est incorrecte (utiliser des chiffres)',
+'err_comm_webpage'				=> 'L’URL n’est pas valide',
+'err_comm_article_id'			=> 'L’ID Article n’est pas valide',
+'err_wrong_token'				=> 'Le jeton de sécurité est expiré ou invalide.',
+
+// Notes
+'note_no_article'				=> 'Aucun article',
+'note_no_commentaire'			=> 'Aucun commentaire',
+'note_comment_closed'			=> 'Commentaires fermés',
+'note_no_link'					=> 'Aucun lien',
+
+// placeholders
+'placeholder_search'			=> 'Rechercher',
+
+// Labels
+'label_code' 					=> 'code',
+'label_article'					=> 'article',
+'label_articles'				=> 'articles',
+'label_commentaire'				=> 'commentaire',
+'label_commentaires'			=> 'commentaires',
+'label_precedent'				=> 'éléments plus récents',
+'label_suivant'					=> 'éléments plus anciens',
+
+// Chiffres 0 à 9 pour captcha
+'chiffres' 						=> array('zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf'),
+
+
+// Navigation
 'preferences'					=> 'Préférences',
 'connexion' 					=> 'Connexion',
 'enregistrer' 					=> 'Enregistrer',
 'valider'	 					=> 'Valider',
-'annuler'	 					=> 'Annuler',
 'editer' 						=> 'Éditer',
 'activer'	 					=> 'Activer',
 'desactiver'	 				=> 'Désactiver',
+'epingler'						=> 'Épingler/Désépingler',
+'archiver'						=> 'Archiver/Désarchiver',
 'mesarticles' 					=> 'Mes articles',
 'mesliens'	 					=> 'Mes liens',
 'mesnotes'	 					=> 'Mes notes',
 'mesabonnements'				=> 'Mes abonnements',
 'monagenda'						=> 'Mon agenda',
+'mescontacts'					=> 'Mes contacts',
 'nouveau' 						=> 'Nouvel article',
 'supprimer' 					=> 'Supprimer',
 'telecharger' 					=> 'Télécharger',
@@ -60,11 +122,13 @@ $GLOBALS['lang'] = array(
 'question_suppr_article'		=> 'Cet article et ses commentaires seront définitivement supprimés !',
 'question_suppr_image'			=> 'Cette image sera définitivement supprimée !',
 'question_suppr_comment'		=> 'Ce commentaire sera définitivement supprimé !',
+'question_suppr_contact'		=> 'Ce contact sera définitivement supprimé !',
 'question_suppr_fichier'		=> 'Ce fichier sera définitivement supprimé !',
 'question_suppr_note'			=> 'Cette note sera définitivement supprimée !',
 'question_suppr_event'			=> 'Cet événement sera définitivement supprimé !',
 'question_quit_page'			=> 'Vos modifications n’ont pas été enregistrées. Quitter la page provoquera la perte des données.',
 'question_clean_rss'			=> 'Tous les articles lus seront supprimés de la BDD ?',
+'question_suppr_feed'			=> 'Ce flux sera supprimé !',
 'question_show_past_events'		=> 'Afficher les événnements passés ?',
 'question_entire_day'			=> 'Toute la journée ?',
 
@@ -89,6 +153,7 @@ $GLOBALS['lang'] = array(
 'confirm_feed_clean'			=> 'Tous les anciens éléments ont été supprimés.',
 'confirm_note_enregistree'		=> 'Notes enregistrées.',
 'confirm_agenda_updated'		=> 'Agenda mis à jour.',
+'confirm_contacts_saved'		=> 'Contacts enregistrés.',
 
 // No-confirmation	
 'error_image_add'				=> 'Le fichier n’a pas pu être ajoutée',
@@ -118,6 +183,7 @@ $GLOBALS['lang'] = array(
 'prefs_legend_configblog'		=> 'Blog et commentaires',
 'prefs_legend_configlinx'		=> 'Liens',
 'prefs_legend_configrss'		=> 'Flux RSS',
+'prefs_legend_configagenda'		=> 'Agenda',
 'pref_auteur'					=> 'Auteur : ',
 'pref_email'					=> 'Adresse e-mail : ',
 'pref_identifiant'				=> 'Identifiant : ',
@@ -151,7 +217,15 @@ $GLOBALS['lang'] = array(
 'pref_linx_dl_auto'				=> 'Importation automatique des fichiers partagés :',
 'pref_ask_everytime'			=> 'Demander à chaque fois',
 'pref_check_update'				=> 'Vérifier les mises à jour automatiquement',
+'pref_id_format'				=> 'Format de l’URL des articles :',
+'pref_id_format_ymdhis'			=> 'Format date : '.date('YmdHis'),
+'pref_id_format_rand6'			=> 'Chaine aléatoire: -ebd68b-',
 'maintenance_optim'				=> 'Nettoyer la base de données',
+'pref_agenda_format'			=> 'Affichage par défaut de l’agenda :',
+'pref_agenda_taskcalendar'		=> 'Calendrier',
+'pref_agenda_tasklist'			=> 'Planning',
+'pref_agenda_ical_link'			=> 'Lien iCal/.ics de l’agenda :',
+'pref_agenda_show_ical_link'	=> 'Afficher le lien iCal.',
 
 // placeholders
 'placeholder_nom_fichier'		=> 'nom',
@@ -164,6 +238,12 @@ $GLOBALS['lang'] = array(
 'placeholder_folder'			=> 'album',
 'placeholder_tags'				=> 'tags',
 'placeholder_url'				=> 'url',
+
+// Notes
+'note_no_feed'					=> 'Aucun flux RSS',
+'note_no_feed_entry'			=> 'Aucune entrée RSS',
+'note_no_notifs'				=> 'Aucune notification',
+
 
 // page backup
 'bak_succes_save'				=> 'Sauvegarde réussie',
@@ -183,13 +263,15 @@ $GLOBALS['lang'] = array(
 'bak_number_articles'			=> 'Nombre d’articles',
 'bak_combien_images'			=> 'Combien d’images ?',
 'bak_combien_linx'				=> 'Combien de liens ?',
-'bak_import_btjson'				=> 'Importer un fichier <strong>JSON</strong> de BlogoText',
-'bak_import_netscape'			=> 'Importer un fichier <strong>HTML</strong> de liens Netscape',
-'bak_import_rssopml'			=> 'Importer un fichier <strong>OPML</strong> de liste de flux RSS',
-'bak_export_json'				=> 'Exporter les données diverses au format <strong>JSON</strong>',
+'bak_import_btjson'				=> 'Importer un fichier <strong>JSON</strong> de données oText',
+'bak_import_netscape'			=> 'Importer un fichier <strong>HTML</strong> de liens.',
+'bak_import_rssopml'			=> 'Importer un fichier <strong>OPML</strong> de flux RSS',
+'bak_import_ctctvcf'			=> 'Importer un fichier <strong>VCF</strong> de contacts',
+'bak_export_json'				=> 'Exporter les articles au format <strong>JSON</strong>',
 'bak_export_netscape'			=> 'Exporter les liens au format <strong>HTML</strong> de Netscape',
 'bak_export_zip'				=> 'Exporter les fichiers du Blog une archive <strong>ZIP</strong>',
-'bak_export_opml'				=> 'Exporter la liste des flux RSS au format <strong>OPML</strong>',
+'bak_export_opml'				=> 'Exporter les abonnements RSS au format <strong>OPML</strong>',
+'bak_export_xmln'				=> 'Exporter les notes au format <strong>XML</strong>',
 'bak_incl_sqlit'				=> 'Inclure la base SQLite',
 'bak_incl_confi'				=> 'Inclure le fichier des préférences',
 'bak_incl_files'				=> 'Inclure les images et les documents',
@@ -204,21 +286,22 @@ $GLOBALS['lang'] = array(
 'rss_label_all_feeds'			=> 'Tous les flux',
 'rss_label_today_feeds'			=> 'Aujourd’hui',
 'rss_label_favs_feeds'			=> 'Favoris',
-'rss_label_refresh'				=> 'Recharger',
+'rss_label_refresh'				=> 'Mettre les flux à jour manuellement',
+'rss_label_reload'				=> 'Recharger les flux depuis le serveur',
 'rss_label_markasread'			=> 'Marquer comme lu',
 'rss_label_unfoldall'			=> 'Tout déplier',
 'rss_label_addfeed'				=> 'Ajouter un flux',
 'rss_label_clean'				=> 'Nettoyer',
 'rss_label_unread'				=> 'Non lus',
-'rss_label_titre_flux'			=> 'Titre du flux :',
-'rss_label_url_flux'			=> 'Url du flux :',
-'rss_label_dossier'				=> 'Dossier (optionnel)',
-'rss_label_config'				=> 'Éditer la liste des flux',
+'rss_label_titre_flux'			=> 'Titre du flux',
+'rss_label_url_flux'			=> 'Url du flux',
+'rss_label_dossier'				=> 'Dossier',
+'rss_label_config'				=> 'Gérer les flux',
 'rss_nothing_here_note'			=> 'Rien ici ? Importez un fichier OPML en cliquant ici : ',
 'rss_jsalert_new_link'			=> 'Url complète du flux RSS/Atom :',
 'rss_jsalert_new_link_folder'	=> 'Dossier du flux (ou laisser vide) :',
 'rss_raccourcis_clavier'		=> 'Ctrl+Haut = lire l’élément précédent, Ctrl+Bas = lire l’élément suivant.',
-'rss_nouveau_flux'				=> 'nouveaux élements.',
+'rss_nouveau_flux'				=> 'nouveaux élements RSS.',
 
 // vérifier les mises à jours
 'maint_chk_update'				=> 'Mises à jour',
@@ -272,17 +355,20 @@ $GLOBALS['lang'] = array(
 // Labels
 'label_date'					=> 'Date',
 'label_titre'					=> 'Titre',
+'label_sans_titre'				=> 'Sans titre',
 'label_contenu'					=> 'Contenu',
 'label_description'				=> 'Description',
 'label_publie'					=> 'Publié',
 'label_publies'					=> 'Publiés',
 'label_invisible'				=> 'Invisible',
 'label_invisibles'				=> 'Invisibles',
+'label_note_archived'			=> 'Notes archivées',
 'label_note_ajout'				=> 'Créer une note…',
 'label_feed_ajout'				=> 'Ajouter un flux',
 'label_event_ajout'				=> 'Ajouter un événement',
 'label_add_title'				=> 'Ajouter un titre',
 'label_add_location'			=> 'Ajouter un lieu',
+'label_add_persons'				=> 'Ajouter des participants',
 'label_add_description'			=> 'Ajouter une description',
 'label_feed_new'				=> 'Nouveau flux ',
 'label_article_derniers'		=> 'Articles récents',
@@ -314,70 +400,11 @@ $GLOBALS['lang'] = array(
 'label_resume'					=> 'Résumé',
 'label_dl_fichier'				=> 'Également importer le fichier ? ',
 'label_all_comm_by_author'		=> 'Tous les commentaires de cet auteur',
-
-
-// Navigation
-'envoyer' 						=> 'Envoyer',
-'preview'						=> 'Prévisualiser',
-'rechercher' 					=> 'Rechercher',
-'succes'						=> 'Succès',
-'echec'							=> 'Échec',
-
-// Label avec " : "
-'label_dp_nom'					=> 'Nom : ',
-'label_dp_pseudo'				=> 'Pseudo : ',
-'label_dp_webpage'				=> 'Site web (facultatif) : ',
-'label_dp_captcha'				=> 'Somme de : ',
-'label_dp_email'				=> 'E-mail (facultatif) : ',
-'label_dp_email_required'		=> 'E-mail : ',
-
-// Commentaire
-'comment_ajout'					=> 'Ajouter un commentaire',
-'comment_cookie'				=> 'Retenir ces informations avec un cookie ? ',
-'comment_subscribe'				=> 'Recevoir des notifications de nouveaux commentaires par email ? ',
-'comment_not_allowed'			=> 'Les commentaires sont fermés pour cet article',
-'no_comments'					=> 'Il n’y a aucun commentaire pour le moment.',
-'comment_need_validation'		=> 'Votre commentaire sera visible après validation par le webmaster.',
-
-// Mois & jours
-'months_fullname'				=> array('janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'),
-'months_abbr'					=> array('janv.','févr.','mars','avril','mai','juin','juil.','août','sept.','oct.','nov.','déc.'),
-'days_abbr'						=> array('lun.','mar.','mer.','jeu.','ven.','sam.','dim.'),
-'days_fullname'					=> array('lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'),
-'days_initials'					=> 'LMMJVSD',
-'aujourdhui'					=> 'aujourd’hui',
-'hier'							=> 'hier',
-
-// Erreurs
-'erreurs' 						=> 'Erreur(s)',
-'err_contenu' 					=> 'Le contenu est vide',
-'err_theme_introuvable'			=> 'Le fichier thème est introuvable, incomplet ou illisible.',
-'err_comm_auteur'				=> 'Le nom de l’auteur est vide',
-'err_comm_email'				=> 'L’adresse e-mail n’est pas valide',
-'err_comm_contenu'				=> 'Le commentaire est vide',
-'err_comm_captcha'				=> 'La somme est incorrecte (utiliser des chiffres)',
-'err_comm_webpage'				=> 'L’URL n’est pas valide',
-'err_comm_article_id'			=> 'L’ID Article n’est pas valide',
-'err_wrong_token'				=> 'Le jeton de sécurité est expiré ou invalide.',
-
-// Notes
-'note_no_article'				=> 'Aucun article',
-'note_no_commentaire'			=> 'Aucun commentaire',
-'note_comment_closed'			=> 'Commentaires fermés',
-'note_no_link'					=> 'Aucun lien',
-
-// placeholders
-'placeholder_search'			=> 'Rechercher',
-
-'note_no_notifs'				=> 'Aucune notification',
-
-// Labels
-'label_code' 					=> 'code',
-'label_article'					=> 'article',
-'label_articles'				=> 'articles',
-'label_commentaire'				=> 'commentaire',
-'label_commentaires'			=> 'commentaires',
-'label_precedent'				=> 'éléments plus récents',
-'label_suivant'					=> 'éléments plus anciens',
+'label_planned'					=> 'planifié',
+'label_contact'					=> 'contact',
+'label_contacts'				=> 'contacts',
+'label_contacts_all'			=> 'Tous les contacts',
+'label_coordonnees'				=> 'Coordonnées',
+'label_profil'					=> 'Profil',
 
 );

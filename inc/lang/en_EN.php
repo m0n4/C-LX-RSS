@@ -10,22 +10,84 @@
    ----------------------------------------- Francais -----------------------------------------*/
 
 $GLOBALS['lang'] = array(
-'id'							=> 'en',
+'id'								=> 'en',
+
+// Navigation
+'envoyer' 							=> 'Send',
+'preview'							=> 'Preview',
+'rechercher' 						=> 'Search',
+'succes'							=> 'Success',
+'echec'								=> 'Fail',
+'annuler'	 						=> 'Cancel',
+
+// Label avec ": "
+'label_dp_nom'						=> 'Name: ',
+'label_dp_pseudo'					=> 'Pseudo: ',
+'label_dp_webpage'					=> 'Website (optionnal): ',
+'label_dp_captcha'					=> 'Sum of: ',
+'label_dp_email'					=> 'E-mail (optionnal): ',
+'label_dp_email_required'			=> 'E-mail: ',
+
+// Mois & jours
+'months_fullname'					=> array('January','February','March','April','May','June','July','August','September','October','November','December'),
+'months_abbr'						=> array('Jan.','Feb.','Mar','Apr','May','June','July','Aug','Sept','Oct','Nov','Dec'),
+'days_abbr'							=> array('Mo','Tu','We','Th','Fr','Sa','Su'),
+'days_abbr_narrow'					=> array('L','M','M','J','V','S','D'),
+'days_fullname'						=> array('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'),
+'aujourdhui'						=> 'Today',
+'hier'								=> 'Yesterday',
+'demain'							=> 'Tomorrow',
+
+// Erreurs
+'erreurs' 							=> 'Error(s)',
+'err_contenu' 						=> 'Content is empty',
+'err_theme_introuvable'				=> 'Theme file is inreadable, not here or broken.',
+'err_comm_auteur'					=> 'Author name is empty',
+'err_comm_email'					=> 'Email is not correct',
+'err_comm_contenu'					=> 'Comment is empty',
+'err_comm_captcha'					=> 'Sum is wrong (use numbers)',
+'err_comm_webpage'					=> 'URL is wrong',
+'err_comm_article_id'				=> 'Article ID is wrong',
+'err_wrong_token'					=> 'Security coin is wrong.',
+
+// Notes
+'note_no_article'					=> 'No articles',
+'note_no_commentaire'				=> 'No comments',
+'note_comment_closed'				=> 'Comments are closed',
+'note_no_link'						=> 'No links',
+
+// placeholders
+'placeholder_search'				=> 'Search',
+
+// Labels
+'label_code' 						=> 'code',
+'label_article'						=> 'article',
+'label_articles'					=> 'articles',
+'label_commentaire'					=> 'comment',
+'label_commentaires'				=> 'comments',
+'label_precedent'					=> 'Newer entries',
+'label_suivant'						=> 'Older entries',
+
+// Chiffres 0 à 9 pour captcha
+'chiffres' => array('zero','one','two','three','four','five','six','seven','eight','nine'),
+
 
 // Navigation
 'preferences'					=> 'Settings',
 'connexion' 					=> 'Connection',
 'enregistrer' 					=> 'Save',
 'valider'	 					=> 'Submit',
-'annuler'	 					=> 'Cancel',
 'editer' 						=> 'Edit',
 'activer'	 					=> 'Activate',
 'desactiver'	 				=> 'Desactivate',
+'epingler'						=> 'Pin/Unpin',
+'archiver'						=> 'Archive/Unarchive',
 'mesarticles' 					=> 'My articles',
 'mesliens'	 					=> 'My links',
 'mesnotes'	 					=> 'My notes',
 'mesabonnements'				=> 'My subscriptions',
 'monagenda'						=> 'My agenda',
+'mescontacts'					=> 'My contacts',
 'nouveau' 						=> 'New article',
 'supprimer' 					=> 'Delete',
 'telecharger' 					=> 'Download',
@@ -60,11 +122,13 @@ $GLOBALS['lang'] = array(
 'question_suppr_article'		=> 'This article and its comments will be deleted!',
 'question_suppr_image'			=> 'This image will be deleted!',
 'question_suppr_comment'		=> 'This comment will be deleted!',
+'question_suppr_contact'		=> 'This contact will be deleted!',
 'question_suppr_fichier'		=> 'This file will be deleted!',
 'question_suppr_note'			=> 'This note will be deleted!',
 'question_suppr_event'			=> 'This event will be deleted!',
 'question_quit_page'			=> 'Leaving this page will have your unsaved modifications lost. Ok?',
 'question_clean_rss'			=> 'All the read items will be removed from database, OK?',
+'question_suppr_feed'			=> 'This feed will be deleted!',
 'question_show_past_events'		=> 'Display past events?',
 'question_entire_day'			=> 'Entire day?',
 
@@ -89,6 +153,7 @@ $GLOBALS['lang'] = array(
 'confirm_feed_clean'			=> 'All old feeds have removed.',
 'confirm_note_enregistree'		=> 'Notes have been saved.',
 'confirm_agenda_updated'		=> 'Agenda has been updated.',
+'confirm_contacts_saved'		=> 'Contacts have been saved.',
 
 // No-confirmation
 'error_image_add'				=> 'File could not have been added',
@@ -118,6 +183,7 @@ $GLOBALS['lang'] = array(
 'prefs_legend_configblog'		=> 'Blog &amp; comments',
 'prefs_legend_configlinx'		=> 'Links',
 'prefs_legend_configrss'		=> 'RSS Feeds',
+'prefs_legend_configagenda'		=> 'Agenda',
 'pref_auteur'					=> 'Author: ',
 'pref_email'					=> 'E-mail address: ',
 'pref_identifiant'				=> 'Login: ',
@@ -151,7 +217,15 @@ $GLOBALS['lang'] = array(
 'pref_linx_dl_auto'				=> 'Automaticaly import shared files?',
 'pref_ask_everytime'			=> 'Ask each time',
 'pref_check_update'				=> 'Check updates automatically',
+'pref_id_format'				=> 'Articles URL format:',
+'pref_id_format_ymdhis'			=> 'Date-like: '.date('YmdHis'),
+'pref_id_format_rand6'			=> 'Random string: -ebd68b-',
 'maintenance_optim'				=> 'Cleanup database',
+'pref_agenda_format'			=> 'Default agenda display',
+'pref_agenda_bigmonth'			=> 'Calendar',
+'pref_agenda_tasklist'			=> 'Tasklist',
+'pref_agenda_ical_link'			=> 'iCal (.ics) links for agenda export:',
+'pref_agenda_show_ical_link'	=> 'Display iCal link.',
 
 // placeholders
 'placeholder_nom_fichier'		=> 'name',
@@ -164,6 +238,12 @@ $GLOBALS['lang'] = array(
 'placeholder_folder'			=> 'folder',
 'placeholder_tags'				=> 'tags',
 'placeholder_url'				=> 'url',
+
+// Notes
+'note_no_feed'					=> 'No RSS feed',
+'note_no_feed_entry'			=> 'No RSS entry',
+'note_no_notifs'				=> 'No notification',
+
 
 // page backup
 'bak_succes_save'				=> 'Backup succeded',
@@ -186,10 +266,12 @@ $GLOBALS['lang'] = array(
 'bak_import_btjson'				=> 'Import a JSON backup from Blogotext',
 'bak_import_netscape'			=> 'Import links from a Netscape file',
 'bak_import_rssopml'			=> 'Import an OPML RSS feeds list',
+'bak_import_ctctvcf'			=> 'Import a VCF contact lists file',
 'bak_export_json'				=> 'Export various data in a JSON file',
 'bak_export_netscape'			=> 'Export your links in a HTML bookmark file',
 'bak_export_zip'				=> 'Export your database &amp; other files in a zip-file',
-'bak_export_opml'				=> 'EXPORT your RSS feeds in an OPML file',
+'bak_export_opml'				=> 'Export your RSS feeds in an OPML file',
+'bak_export_xmln'				=> 'Export your notes in a XML file',
 'bak_incl_sqlit'				=> 'Include SQLite file',
 'bak_incl_confi'				=> 'Include configuration files',
 'bak_incl_files'				=> 'Include images and files',
@@ -204,7 +286,8 @@ $GLOBALS['lang'] = array(
 'rss_label_all_feeds'			=> 'All feeds',
 'rss_label_today_feeds'			=> 'Today',
 'rss_label_favs_feeds'			=> 'Bookmarks',
-'rss_label_refresh'				=> 'Refresh',
+'rss_label_refresh'				=> 'Manually refresh the feeds',
+'rss_label_reload'				=> 'Reload feeds from server',
 'rss_label_markasread'			=> 'Mark as read',
 'rss_label_unfoldall'			=> 'Unfold all',
 'rss_label_addfeed'				=> 'Add a feed',
@@ -243,7 +326,7 @@ $GLOBALS['lang'] = array(
 'err_prefs_racine_http'			=> 'URL has to begin with "http://" or "https://"',
 'err_prefs_racine_slash'		=> 'URL must end with  "/"',
 'err_lien_vide'					=> 'URL is empty',
-'err_feed_exists'				=> 'Feed alreday exists.',
+'err_feed_exists'				=> 'Feed already exists.',
 'err_feed_wrong_param'			=> 'Wrong request.',
 
 // Titles - liens
@@ -272,12 +355,14 @@ $GLOBALS['lang'] = array(
 // Labels
 'label_date'					=> 'Date',
 'label_titre'					=> 'Title',
+'label_sans_titre'				=> 'No title',
 'label_contenu'					=> 'Content',
 'label_description'				=> 'Description',
 'label_publie'					=> 'Published',
 'label_publies'					=> 'Published',
 'label_invisible'				=> 'Invisible',
 'label_invisibles'				=> 'Invisible',
+'label_note_archived'			=> 'Archived notes',
 'label_note_ajout'				=> 'Add a note',
 'label_feed_ajout'				=> 'Add a feed',
 'label_event_ajout'				=> 'Add an event',
@@ -314,68 +399,11 @@ $GLOBALS['lang'] = array(
 'label_resume'					=> 'Home',
 'label_dl_fichier'				=> 'Also import file localy? ',
 'label_all_comm_by_author'		=> 'All comments by this author',
+'label_planned'					=> 'planned',
+'label_contact'					=> 'contact',
+'label_contacts'				=> 'contacts',
+'label_contacts_all'			=> 'All the contacts',
+'label_coordonnees'				=> 'Contact information',
+'label_profil'					=> 'Profile',
 
-
-// Navigation
-'envoyer' 							=> 'Send',
-'preview'							=> 'Preview',
-'rechercher' 						=> 'Search',
-'succes'							=> 'Success',
-'echec'								=> 'Fail',
-
-// Label avec ": "
-'label_dp_nom'						=> 'Name: ',
-'label_dp_pseudo'					=> 'Pseudo: ',
-'label_dp_webpage'					=> 'Website (optionnal): ',
-'label_dp_captcha'					=> 'Sum of: ',
-'label_dp_email'					=> 'E-mail (optionnal): ',
-'label_dp_email_required'			=> 'E-mail: ',
-
-// Commentaire
-'comment_ajout'						=> 'Write a comment',
-'comment_cookie'					=> 'Use a cookie to remember these informations? ',
-'comment_subscribe'					=> 'Get email notification by email? ',
-'comment_not_allowed'				=> 'Comments are closed for this entry.',
-'no_comments'						=> 'No comments yet.',
-'comment_need_validation'			=> 'Your comment will be visible after approbation by the webmaster.',
-
-// Mois & jours
-'months_fullname'					=> array('January','February','March','April','May','June','July','August','September','October','November','December'),
-'months_abbr'						=> array('Jan.','Feb.','Mar','Apr','May','June','July','Aug','Sept','Oct','Nov','Dec'),
-'days_abbr'							=> array('Mo','Tu','We','Th','Fr','Sa','Su'),
-'days_fullname'						=> array('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'),
-'days_initials'						=> 'MTWTFSS',
-'aujourdhui'						=> 'Today',
-'hier'								=> 'Yesterday',
-
-// Erreurs
-'erreurs' 							=> 'Error(s)',
-'err_contenu' 						=> 'Content is empty',
-'err_theme_introuvable'				=> 'Theme file is inreadable, not here or broken.',
-'err_comm_auteur'					=> 'Author name is empty',
-'err_comm_email'					=> 'Email is not correct',
-'err_comm_contenu'					=> 'Comment is empty',
-'err_comm_captcha'					=> 'Sum is wrong (use numbers)',
-'err_comm_webpage'					=> 'URL is wrong',
-'err_comm_article_id'				=> 'Article ID is wrong',
-'err_wrong_token'					=> 'Security coin is wrong.',
-
-// Notes
-'note_no_article'					=> 'No articles',
-'note_no_commentaire'				=> 'No comments',
-'note_comment_closed'				=> 'Comments are closed',
-'note_no_link'						=> 'No links',
-
-// placeholders
-'placeholder_search'				=> 'Search',
-
-'note_no_notifs'				=> 'No notification',
-// Labels
-'label_code' 						=> 'code',
-'label_article'						=> 'article',
-'label_articles'					=> 'articles',
-'label_commentaire'					=> 'comment',
-'label_commentaires'				=> 'comments',
-'label_precedent'					=> 'Newer entries',
-'label_suivant'						=> 'Older entries',
 );

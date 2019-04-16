@@ -50,8 +50,6 @@ function create_tables() {
 					$db_handle = new PDO('sqlite:'.$file);
 					$db_handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 					$db_handle->query("PRAGMA temp_store=MEMORY; PRAGMA synchronous=OFF; PRAGMA journal_mode=WAL;");
-
-
 					$wanted_tables = array_keys($dbase_structure);
 					foreach ($wanted_tables as $table_name) {
 							$results = $db_handle->exec($dbase_structure[$table_name]);
@@ -94,27 +92,18 @@ function open_base() {
 }
 
 
-/* lists articles with search criterias given in $array. Returns an array containing the data*/
-function liste_elements($query, $array, $data_type) {
+/* lists elements with search criterias given in $array. Returns an array containing the data */
+function liste_elements($query, $array, $data_type='') {
 	try {
 		$req = $GLOBALS['db_handle']->prepare($query);
 		$req->execute($array);
 		$return = array();
-
-		switch ($data_type) {
-			case 'rss':
-				while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
-					$return[] = $row;
-				}
-				break;
-			default:
-				break;
+		while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
+			$return[] = $row;
 		}
-
 		return $return;
 	} catch (Exception $e) {
-		die($query);
-		die('Erreur 89208 : '.$e->getMessage());
+		die('Erreur 89208 : '.$e->getMessage() . "\n<br/>".$query);
 	}
 }
 
@@ -152,6 +141,13 @@ function get_entry($table, $entry, $id, $retour_mode) {
 }
 
 
+// POST ARTICLE
+/*
+ * On post of an article (always on admin sides)
+ * gets posted informations and turn them into
+ * an array
+ *
+ */
 
 /* FOR COMMENTS : RETUNS nb_com per author */
 function nb_entries_as($table, $what) {
@@ -163,6 +159,34 @@ function nb_entries_as($table, $what) {
 	} catch (Exception $e) {
 		die('Erreur 0349 : '.$e->getMessage());
 	}
+}
+
+/* FOR TAGS (articles & notes) */
+function list_all_tags($table, $statut) {
+	try {
+		if ($statut !== FALSE) {
+			$res = $GLOBALS['db_handle']->query("SELECT bt_tags FROM $table WHERE bt_statut = $statut");
+		} else {
+			$res = $GLOBALS['db_handle']->query("SELECT bt_tags FROM $table");
+		}
+		$liste_tags = '';
+		// met tous les tags de tous les articles bout à bout
+		while ($entry = $res->fetch()) {
+			if (trim($entry['bt_tags']) != '') {
+				$liste_tags .= $entry['bt_tags'].',';
+			}
+		}
+		$res->closeCursor();
+		$liste_tags = rtrim($liste_tags, ',');
+	} catch (Exception $e) {
+		die('Erreur 4354768 : '.$e->getMessage());
+	}
+
+	$liste_tags = str_replace(array(', ', ' ,'), ',', $liste_tags);
+	$tab_tags = explode(',', $liste_tags);
+	sort($tab_tags);
+	unset($tab_tags['']);
+	return array_count_values($tab_tags);
 }
 
 
@@ -222,76 +246,19 @@ function rss_list_guid() {
 
 /* FOR RSS : RETUNS nb of articles per feed */
 function rss_count_feed() {
-	$result = array();
-	$query = "SELECT bt_feed, SUM(bt_statut) AS nbrun, SUM(bt_bookmarked) AS nbfav, SUM(CASE WHEN bt_date >= 20180527000000 AND bt_statut = 1 THEN 1 ELSE 0 END) AS nbtoday FROM rss GROUP BY bt_feed";
+	$result = $return = array();
+	//$query = "SELECT bt_feed, SUM(bt_statut) AS nbrun, SUM(bt_bookmarked) AS nbfav, SUM(CASE WHEN bt_date >= ".date('Ymd').'000000'." AND bt_statut = 1 THEN 1 ELSE 0 END) AS nbtoday FROM rss GROUP BY bt_feed";
 
-	//$query = "SELECT bt_feed, SUM(bt_statut) AS nbrun, SUM(bt_bookmarked) AS nbfav FROM rss GROUP BY bt_feed";
+	$query = "SELECT bt_feed, SUM(bt_statut) AS nbrun FROM rss GROUP BY bt_feed";
 	try {
 		$result = $GLOBALS['db_handle']->query($query)->fetchAll(PDO::FETCH_ASSOC);
-		return $result;
+
+		foreach($result as $i => $res) {
+			$return[$res['bt_feed']] = $res['nbrun'];
+		}
+		return $return;
 	} catch (Exception $e) {
 		die('Erreur 0329-rss-count_per_feed : '.$e->getMessage());
 	}
 }
-
-/* FOR RSS : get $_POST and update feeds (title, url…) for feeds.php?config */
-function traiter_form_rssconf() {
-	$msg_param_to_trim = (isset($_GET['msg'])) ? '&msg='.$_GET['msg'] : '';
-	$query_string = str_replace($msg_param_to_trim, '', $_SERVER['QUERY_STRING']);
-	// traitement
-	$GLOBALS['db_handle']->beginTransaction();
-	foreach($GLOBALS['liste_flux'] as $i => $feed) {
-		if (isset($_POST['i_'.$feed['checksum']])) {
-			// feed marked to be removed
-			if ($_POST['k_'.$feed['checksum']] == 0) {
-				unset($GLOBALS['liste_flux'][$i]);
-				try {
-					$req = $GLOBALS['db_handle']->prepare('DELETE FROM rss WHERE bt_feed=?');
-					$req->execute(array($feed['link']));
-				} catch (Exception $e) {
-					die('Error : Rss?conf RM-from db: '.$e->getMessage());
-				}
-			}
-			// title, url or folders have changed
-			else {
-				// title has change
-				$GLOBALS['liste_flux'][$i]['title'] = $_POST['i_'.$feed['checksum']];
-				// folder has changed : update & change folder where it must be changed
-				if ($GLOBALS['liste_flux'][$i]['folder'] != $_POST['l_'.$feed['checksum']]) {
-					$GLOBALS['liste_flux'][$i]['folder'] = $_POST['l_'.$feed['checksum']];
-					try {
-						$req = $GLOBALS['db_handle']->prepare('UPDATE rss SET bt_folder=? WHERE bt_feed=?');
-						$req->execute(array($_POST['l_'.$feed['checksum']], $feed['link']));
-					} catch (Exception $e) {
-						die('Error : Rss?conf Update-feed db: '.$e->getMessage());
-					}
-				}
-
-				// URL has change
-				if ($_POST['j_'.$feed['checksum']] != $GLOBALS['liste_flux'][$i]['link']) {
-					$a = $GLOBALS['liste_flux'][$i];
-					$a['link'] = $_POST['j_'.$feed['checksum']];
-					unset($GLOBALS['liste_flux'][$i]);
-					$GLOBALS['liste_flux'][$a['link']] = $a;
-					try {
-						$req = $GLOBALS['db_handle']->prepare('UPDATE rss SET bt_feed=? WHERE bt_feed=?');
-						$req->execute(array($_POST['j_'.$feed['checksum']], $feed['link']));
-					} catch (Exception $e) {
-						die('Error : Rss?conf Update-feed db: '.$e->getMessage());
-					}
-				}
-			}
-		}
-	}
-	$GLOBALS['db_handle']->commit();
-
-	// sort list with title
-	$GLOBALS['liste_flux'] = array_reverse(tri_selon_sous_cle($GLOBALS['liste_flux'], 'title'));
-	file_put_contents(FEEDS_DB, '<?php /* '.chunk_split(base64_encode(serialize($GLOBALS['liste_flux']))).' */');
-
-	$redir = basename($_SERVER['SCRIPT_NAME']).'?'.$query_string.'&msg=confirm_feeds_edit';
-	redirection($redir);
-
-}
-
 

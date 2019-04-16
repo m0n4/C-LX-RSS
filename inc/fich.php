@@ -63,79 +63,33 @@ function fichier_adv_conf() {
 	}
 }
 
-
 function fichier_prefs() {
 	$fichier_prefs = DIR_CONFIG.'prefs.php';
 	if(!empty($_POST['_verif_envoi'])) {
 		$lang = (isset($_POST['langue']) and preg_match('#^[a-z]{2}$#', $_POST['langue'])) ? $_POST['langue'] : 'fr';
 		$auteur = addslashes(clean_txt(htmlspecialchars($_POST['auteur'])));
 		$email = addslashes(clean_txt(htmlspecialchars($_POST['email'])));
-		$nomsite = addslashes(clean_txt(htmlspecialchars($_POST['nomsite'])));
-		$description = addslashes(clean_txt(htmlspecialchars($_POST['description'])));
-		$keywords = addslashes(clean_txt(htmlspecialchars($_POST['keywords'])));
 		$racine = addslashes(trim(htmlspecialchars($_POST['racine'])));
-		$max_bill_acceuil = htmlspecialchars($_POST['nb_maxi']);
-		$max_bill_admin = htmlspecialchars($_POST['nb_list']);
-		$max_comm_admin = htmlspecialchars($_POST['nb_list_com']);
 		$format_date = htmlspecialchars($_POST['format_date']);
 		$format_heure = htmlspecialchars($_POST['format_heure']);
 		$fuseau_horaire = addslashes(clean_txt(htmlspecialchars($_POST['fuseau_horaire'])));
-		$global_com_rule = (isset($_POST['global_comments'])) ? '1' : '0';
-		$activer_categories = (isset($_POST['activer_categories'])) ? '1' : '0';
-		$theme_choisi = addslashes(clean_txt(htmlspecialchars($_POST['theme'])));
-		$comm_defaut_status = htmlspecialchars($_POST['comm_defaut_status']);
-		$automatic_keywords = (isset($_POST['auto_keywords'])) ? '1' : '0';
-		$require_email = (isset($_POST['require_email'])) ? '1' : '0';
-		$auto_check_updates = (isset($_POST['check_update'])) ? '1' : '0';
-		$auto_dl_liens_fichiers = htmlspecialchars($_POST['dl_link_to_files']);
-		$nombre_liens_admin = htmlspecialchars($_POST['nb_list_linx']);
 	} else {
 		$lang = (isset($_POST['langue']) and preg_match('#^[a-z]{2}$#', $_POST['langue'])) ? $_POST['langue'] : 'fr';
 		$auteur = addslashes(clean_txt(htmlspecialchars(USER_LOGIN)));
 		$email = 'mail@example.com';
-		$nomsite = 'Blogotext';
-		$description = addslashes(clean_txt($GLOBALS['lang']['go_to_pref']));
-		$keywords = 'blog, blogotext';
 		$racine = addslashes(clean_txt(trim(htmlspecialchars($_POST['racine']))));
-		$max_bill_acceuil = '10';
-		$max_bill_admin = '25';
-		$max_comm_admin = '50';
 		$format_date = '0';
 		$format_heure = '0';
 		$fuseau_horaire = 'UTC';
-		$global_com_rule = '0';
-		$activer_categories = '1';
-		$theme_choisi = 'default';
-		$comm_defaut_status = '1';
-		$automatic_keywords = '1';
-		$require_email = '0';
-		$auto_check_updates = 1;
-		$auto_dl_liens_fichiers = '0';
-		$nombre_liens_admin = '50';
 	}
 	$prefs = "<?php\n";
 	$prefs .= "\$GLOBALS['lang'] = '".$lang."';\n";
 	$prefs .= "\$GLOBALS['auteur'] = '".$auteur."';\n";
 	$prefs .= "\$GLOBALS['email'] = '".$email."';\n";
-	$prefs .= "\$GLOBALS['nom_du_site'] = '".$nomsite."';\n";
-	$prefs .= "\$GLOBALS['description'] = '".$description."';\n";
-	$prefs .= "\$GLOBALS['keywords'] = '".$keywords."';\n";
 	$prefs .= "\$GLOBALS['racine'] = '".$racine."';\n";
-	$prefs .= "\$GLOBALS['max_bill_acceuil'] = '".$max_bill_acceuil."';\n";
-	$prefs .= "\$GLOBALS['max_bill_admin'] = '".$max_bill_admin."';\n";
-	$prefs .= "\$GLOBALS['max_comm_admin'] = '".$max_comm_admin."';\n";
 	$prefs .= "\$GLOBALS['format_date'] = '".$format_date."';\n";
 	$prefs .= "\$GLOBALS['format_heure'] = '".$format_heure."';\n";
 	$prefs .= "\$GLOBALS['fuseau_horaire'] = '".$fuseau_horaire."';\n";
-	$prefs .= "\$GLOBALS['activer_categories']= '".$activer_categories."';\n";
-	$prefs .= "\$GLOBALS['theme_choisi']= '".$theme_choisi."';\n";
-	$prefs .= "\$GLOBALS['global_com_rule']= '".$global_com_rule."';\n";
-	$prefs .= "\$GLOBALS['comm_defaut_status']= '".$comm_defaut_status."';\n";
-	$prefs .= "\$GLOBALS['automatic_keywords']= '".$automatic_keywords."';\n";
-	$prefs .= "\$GLOBALS['require_email']= '".$require_email."';\n";
-	$prefs .= "\$GLOBALS['check_update']= '".$auto_check_updates."';\n";
-	$prefs .= "\$GLOBALS['max_linx_admin']= '".$nombre_liens_admin."';\n";
-	$prefs .= "\$GLOBALS['dl_link_to_files']= '".$auto_dl_liens_fichiers."';\n";
 	$prefs .= "?>";
 	if (file_put_contents($fichier_prefs, $prefs) === FALSE) {
 		return FALSE;
@@ -197,32 +151,18 @@ function fichier_htaccess($dossier) {
 	}
 }
 
-
-
-// à partir de l’extension du fichier, trouve le "type" correspondant.
-// les "type" et le tableau des extensions est le $GLOBALS['files_ext'] dans conf.php
-function detection_type_fichier($extension) {
-	$good_type = 'other'; // par défaut
-	foreach($GLOBALS['files_ext'] as $type => $exts) {
-		if ( in_array($extension, $exts) ) {
-			$good_type = $type;
-			break; // sort du foreach au premier 'match'
-		}
-	}
-	return $good_type;
-}
-
-
 function open_serialzd_file($fichier) {
 	$liste  = (file_exists($fichier)) ? unserialize(base64_decode(substr(file_get_contents($fichier), strlen('<?php /* '), -strlen(' */')))) : array();
 	return $liste;
 }
 
-// $feeds is an array of URLs: Array( [http://…], [http://…], …)
+// $feeds is an array of URLs: Array( [http://…] => md5(), [http://…] => md5(), …)
 // Returns the same array: Array([http://…] [[headers]=> 'string', [body]=> 'string'], …)
 function request_external_files($feeds, $timeout, $echo_progress=false) {
-	// uses chunks of 30 feeds because Curl has problems with too big (~150) "multi" requests.
+
+	// uses chunks (smaller arrays) of 30 feeds because Curl has problems with too big "multi" requests (or server might has a limit).
 	$chunks = array_chunk($feeds, 30, true);
+
 	$results = array();
 	$total_feed = count($feeds);
 	if ($echo_progress === true) {
@@ -230,58 +170,59 @@ function request_external_files($feeds, $timeout, $echo_progress=false) {
 	}
 
 	foreach ($chunks as $chunk) {
-		set_time_limit(30);
-		$curl_arr = array();
-		$master = curl_multi_init();
-		$total_feed_chunk = count($chunk)+count($results);
 
-		// init each url
-		foreach ($chunk as $i => $url) {
+			set_time_limit(30);
+			$curl_arr = array();
+			$master = curl_multi_init();
+			$total_feed_chunk = count($chunk)+count($results);
 
-			$curl_arr[$url] = curl_init(trim($url));
-			curl_setopt_array($curl_arr[$url], array(
-					CURLOPT_RETURNTRANSFER => TRUE, // force Curl to return data instead of displaying it
-					CURLOPT_FOLLOWLOCATION => TRUE, // follow 302 ans 301 redirects
-					CURLOPT_CONNECTTIMEOUT => 100, // 0 = indefinately ; no connection-timeout (ruled out by "set_time_limit" hereabove)
-					CURLOPT_TIMEOUT => $timeout, // downloading timeout
-					CURLOPT_USERAGENT => BLOGOTEXT_UA, // User-agent (uses the UA of browser)
-					CURLOPT_SSL_VERIFYPEER => FALSE, // ignore SSL errors
-					CURLOPT_SSL_VERIFYHOST => FALSE, // ignore SSL errors
-					CURLOPT_ENCODING => "gzip", // take into account gziped pages
-					CURLOPT_VERBOSE => 0,
-					CURLOPT_HEADER => 1, // also return header
-				));
-			curl_multi_add_handle($master, $curl_arr[$url]);
-		}
+			// init each url
+			foreach ($chunk as $url => $feed_url_hash) {
 
-		// exec connexions
-		$running = $oldrunning = 0;
-
-		do {
-			curl_multi_exec($master, $running);
-
-			if ($echo_progress === true) {
-				// echoes the nb of feeds remaining
-				echo ($total_feed_chunk-$running).'/'.$total_feed.' '; ob_flush(); flush();
+				$curl_arr[$url] = curl_init(trim($url));
+				curl_setopt_array($curl_arr[$url], array(
+						CURLOPT_RETURNTRANSFER => TRUE, // force Curl to return data instead of displaying it
+						CURLOPT_FOLLOWLOCATION => TRUE, // follow 302 ans 301 redirects
+						CURLOPT_CONNECTTIMEOUT => 0, // 0 = indefinately ; no connection-timeout (ruled out by "set_time_limit" hereabove)
+						CURLOPT_TIMEOUT => $timeout, // downloading timeout
+						CURLOPT_USERAGENT => BLOGOTEXT_UA, // User-agent (uses the UA of browser)
+						CURLOPT_SSL_VERIFYPEER => FALSE, // ignore SSL errors
+						CURLOPT_SSL_VERIFYHOST => FALSE, // ignore SSL errors
+						CURLOPT_ENCODING => "gzip", // take into account gziped pages
+						CURLOPT_VERBOSE => 0,
+						CURLOPT_HEADER => 1, // also return header
+					));
+				curl_multi_add_handle($master, $curl_arr[$url]);
 			}
-			usleep(100000);
-		} while ($running > 0);
 
+			// exec connexions
+			$running = $oldrunning = 0;
+			$utime = microtime(true);
+			do {
+				curl_multi_exec($master, $running);
 
-		// multi select contents
-		foreach ($chunk as $i => $url) {
-			$response = curl_multi_getcontent($curl_arr[$url]);
-			$header_size = curl_getinfo($curl_arr[$url], CURLINFO_HEADER_SIZE);
-			$results[$url]['headers'] = http_parse_headers(mb_strtolower(substr($response, 0, $header_size)));
+				// echoes the nb of feeds remaining
+				if ($echo_progress === true) {
+					if ($utime + 0.5 < microtime(true)) { // only echos every 0.5 secondes max
+						echo ($total_feed_chunk-$running).'/'.$total_feed.' '; ob_flush(); flush();
+						$utime = microtime(true);
+					}
+				}
+				usleep(1001);
+			} while ($running > 0);
 
-			// get only header, trim it, remove invalid UTF8 chars (half bits, etc.).
+			// multi select contents
+			foreach ($chunk as $url => $feed_url_hash) {
+				$response = curl_multi_getcontent($curl_arr[$url]);
+				$header_size = curl_getinfo($curl_arr[$url], CURLINFO_HEADER_SIZE);
+				$results[$feed_url_hash]['url'] = curl_getinfo($curl_arr[$url], CURLINFO_EFFECTIVE_URL);
+				$results[$feed_url_hash]['headers'] = http_parse_headers(mb_strtolower(substr($response, 0, $header_size)));
+				$results[$feed_url_hash]['body'] = mb_convert_encoding(trim(substr($response, $header_size)), 'UTF-8');
 
-			//$results[$url]['body'] = iconv("UTF-8", "UTF-8//IGNORE", trim(substr($response, $header_size))); // deprecated, iconv uses a bugged lib
-			$results[$url]['body'] = mb_convert_encoding(trim(substr($response, $header_size)), 'UTF-8'); 
+			}
+			// Ferme les gestionnaires
+			curl_multi_close($master);
 
-		}
-		// Ferme les gestionnaires
-		curl_multi_close($master);
 	}
 
 	return $results;
@@ -295,36 +236,40 @@ function refresh_rss($feeds) {
 	$count_new = 0;
 	$total_feed = count($feeds);
 
-	$retrieved_elements = retrieve_new_feeds(array_keys($feeds));
+	//foreach ($GLOBALS['liste_flux'] as $i => $feed) {
+	foreach ($feeds as $i => $feed) {
+		$urls[$feed['link']] = $i;
+	}
+
+	$retrieved_elements = retrieve_new_feeds($urls);
 
 	if (!$retrieved_elements) return 0;
 
-	foreach ($retrieved_elements as $feed_url => $feed_elmts) {
-		if ($feed_elmts === FALSE) {
-			continue;
-		} else {
-			// there are new posts in the feed (md5 test on feed content file is positive). Now test on each post.
-			// only keep new post that are not in DB (in $guid_in_db) OR that are newer than the last post ever retreived.
+	foreach ($retrieved_elements as $feed_id => $feed_elmts) {
+	//	if ($feed_elmts === FALSE) {
+	//		continue;
+	//	} else {
 			foreach($feed_elmts['items'] as $key => $item) {
-				if ( (in_array($item['bt_id'], $guid_in_db)) or ($item['bt_date'] <= $feeds[$feed_url]['time']) ) {
+				// if item in DB or item older that last rss-update, discard item.
+				if ( (in_array($item['bt_id'], $guid_in_db)) or ($item['bt_date'] <= $feeds[$feed_id]['time']) ) {
 					unset($feed_elmts['items'][$key]);
-				} else { // init bt_statut & bt_bbokmarked
+				// else, init item 
+				} else {
 					$feed_elmts['items'][$key]['bt_statut'] = 1;
 					$feed_elmts['items'][$key]['bt_bookmarked'] = 0;
 
 				}
-				// only save elements that are more recent
 				// we save the date of the last element on that feed
 				// we do not use the time of last retreiving, because it might not be correct due to different time-zones with the feeds date.
-				if ($item['bt_date'] > $GLOBALS['liste_flux'][$feeds[$feed_url]['link']]['time']) {
-					$GLOBALS['liste_flux'][$feeds[$feed_url]['link']]['time'] = $item['bt_date'];
+				if ($item['bt_date'] > $GLOBALS['liste_flux'][$feed_id]['time']) {
+					$GLOBALS['liste_flux'][$feed_id]['time'] = $item['bt_date'];
 				}
 			}
+			// keep the remaining posts
 			if (!empty($feed_elmts['items'])) {
-				// populates the list of post we keep, to be saved in DB
 				$new_feed_elems = array_merge($new_feed_elems, $feed_elmts['items']);
 			}
-		}
+	//	}
 	}
 
 	// if list of new elements is !empty, save new elements
@@ -336,41 +281,56 @@ function refresh_rss($feeds) {
 		}
 	}
 
+	// recount unread elements (they are put in that array for caching ans performance purpose).
+	$feeds_nb = rss_count_feed();
+	foreach ($GLOBALS['liste_flux'] as $hash => $item) {
+		$GLOBALS['liste_flux'][$hash]['nbrun'] = 0;
+		if (isset($feeds_nb[$hash])) {
+			$GLOBALS['liste_flux'][$hash]['nbrun'] = $feeds_nb[$hash];
+		}
+	}
+
 	// save last success time in the feed list
 	file_put_contents(FEEDS_DB, '<?php /* '.chunk_split(base64_encode(serialize($GLOBALS['liste_flux']))).' */');
 
-	// returns the new feeds in JSON format
-
 	return $new_feed_elems;
-	//return $count_new;
 }
 
 
 
-function retrieve_new_feeds($feedlinks, $md5='') {
-	if (!$feeds = request_external_files($feedlinks, 15, true)) { // timeout = 25s
+function retrieve_new_feeds($feedlinks) {
+	if (!$feeds = request_external_files($feedlinks, 25, true)) { // timeout = 25s
 		return FALSE;
 	}
 
 	$return = array();
-	foreach ($feeds as $url => $response) {
+	foreach ($feeds as $feed_id => $response) {
+		$GLOBALS['liste_flux'][$feed_id]['iserror'] = 0;
 		if (!empty($response['body'])) {
 			$new_md5 = hash('md5', $response['body']);
 			// if Feed has changed : parse it (otherwise, do nothing : no need)
-			if ($md5 != $new_md5 or '' == $md5) {
-				$data_array = feed2array($response['body'], $url);
-				if ($data_array !== FALSE) {
-					$return[$url] = $data_array;
-					$data_array['infos']['md5'] = $md5;
-					// update RSSs of 30 feeds because Curl has problems with too big (~150) "multi" requests. last successfull update MD5
-					$GLOBALS['liste_flux'][$url]['checksum'] = $new_md5;
-					$GLOBALS['liste_flux'][$url]['iserror'] = 0;
-				} else {
-					if (isset($GLOBALS['liste_flux'][$url])) { // error on feed update (else would be on adding new feed)
-						$GLOBALS['liste_flux'][$url]['iserror'] += 1;
+			if ($GLOBALS['liste_flux'][$feed_id]['checksum'] != $new_md5) {
+				$data_array = feed2array($response['body']);
+				if ($data_array !== FALSE and is_array($data_array['items'])) {
+					// attach feed -ID & -folder to the individual items
+					foreach ($data_array['items'] as $i => $item) {
+						$data_array['items'][$i]['bt_feed'] = $feed_id;
+						$data_array['items'][$i]['bt_folder'] = $GLOBALS['liste_flux'][$feed_id]['folder'];
+					}
+
+					$return[$feed_id] = $data_array;
+					$GLOBALS['liste_flux'][$feed_id]['checksum'] = $new_md5;
+					$GLOBALS['liste_flux'][$feed_id]['iserror'] = 0;
+				// array IS false : XML error
+				} elseif ($data_array === FALSE) {
+					if (isset($GLOBALS['liste_flux'][$feed_id])) { // if it was not set, it would be an error on "feed-add" (this error is handled further)
+						$GLOBALS['liste_flux'][$feed_id]['iserror'] = 'XML Parsing Error';
 					}
 				}
 			}
+		}
+		else {
+			$GLOBALS['liste_flux'][$feed_id]['iserror'] = 'Empty HTTP Response.';
 		}
 	}
 
@@ -380,7 +340,7 @@ function retrieve_new_feeds($feedlinks, $md5='') {
 
 
 # Based upon Feed-2-array, by bronco@warriordudimanche.net
-function feed2array($feed_content, $feedlink) {
+function feed2array($feed_content) {
 	$flux = array('infos'=>array(),'items'=>array());
 
 	if (preg_match('#<rss(.*)</rss>#si', $feed_content)) { $flux['infos']['type'] = 'RSS'; } //RSS ?
@@ -392,8 +352,8 @@ function feed2array($feed_content, $feedlink) {
 			$flux['infos']['version']=$feed_obj->attributes()->version;
 			if (!empty($feed_obj->channel->title)) { $flux['infos']['title'] = (string)$feed_obj->channel->title; }
 			if (!empty($feed_obj->title)) {          $flux['infos']['title'] = (string)$feed_obj->title; }
-			if (!empty($feed_obj->channel->link)) { $flux['infos']['link'] = (string)$feed_obj->channel->link; }
-			if (!empty($feed_obj->link)) {          $flux['infos']['link'] = (string)$feed_obj->link; }
+			if (!empty($feed_obj->channel->link)) {  $flux['infos']['link'] = (string)$feed_obj->channel->link; }
+			if (!empty($feed_obj->link)) {           $flux['infos']['link'] = (string)$feed_obj->link; }
 
 			if (!empty($feed_obj->channel->item)){ $items = $feed_obj->channel->item; }
 			if (!empty($feed_obj->entry)){ $items = $feed_obj->entry; }
@@ -418,12 +378,12 @@ function feed2array($feed_content, $feedlink) {
 				if (empty($flux['items'][$c]['bt_id'])) {
 					$flux['items'][$c]['bt_id'] = microtime();
 				}
-				$flux['items'][$c]['bt_id'] = hash('crc32', $flux['items'][$c]['bt_id']);
+				$flux['items'][$c]['bt_id'] = hash('md5', $flux['items'][$c]['bt_id']);
 
 				// date
-				if (!empty($item->updated)) {       $flux['items'][$c]['bt_date'] = date('YmdHis', strtotime((string)$item->updated)); }
-				if (!empty($item->pubDate)) {       $flux['items'][$c]['bt_date'] = date('YmdHis', strtotime((string)$item->pubDate)); }
-				if (!empty($item->published)) {     $flux['items'][$c]['bt_date'] = date('YmdHis', strtotime((string)$item->published)); }
+				if (!empty($item->updated)) {   $flux['items'][$c]['bt_date'] = date('YmdHis', strtotime((string)$item->updated)); }
+				if (!empty($item->pubDate)) {   $flux['items'][$c]['bt_date'] = date('YmdHis', strtotime((string)$item->pubDate)); }
+				if (!empty($item->published)) { $flux['items'][$c]['bt_date'] = date('YmdHis', strtotime((string)$item->published)); }
 				if (empty($flux['items'][$c]['bt_date'])) {
 					$flux['items'][$c]['bt_date'] = date('YmdHis');
 				}
@@ -435,20 +395,15 @@ function feed2array($feed_content, $feedlink) {
 
 				// SPECIAL CASES
 				//  for Youtube
-				if (strpos(parse_url($feedlink, PHP_URL_HOST), 'youtube.com') !== FALSE) {
-					$content = $item->children('media', true)->group->children('media', true)->description;
+				if (isset($flux['items'][$c]['bt_link']) and strpos(parse_url($flux['items'][$c]['bt_link'], PHP_URL_HOST), 'youtube.com') !== FALSE) {
+					$content = (string)$item->children('media', true)->group->description;
 					$yt_video_id = (string)$item->children('yt', true)->videoId;
-					if (!empty($yt_video_id) ) { $flux['items'][$c]['bt_content'] = '<iframe width="1120" height="630" src="https://www.youtube.com/embed/'.$yt_video_id.'?rel=0"></iframe>'; }
+					if (!empty($yt_video_id) ) { $flux['items'][$c]['bt_content'] = '<div class="youtube-iframe-container"><iframe width="1120" height="630" src="https://www.youtube.com/embed/'.$yt_video_id.'?rel=0"></iframe></div>'; }
 					if (!empty($content) ) { $flux['items'][$c]['bt_content'] .= nl2br((string) $content); }
 				}
 
 
 				if (empty($flux['items'][$c]['bt_content'])) $flux['items'][$c]['bt_content'] = '-';
-
-				// place le lien du flux (on a besoin de ça)
-				$flux['items'][$c]['bt_feed'] = $feedlink;
-				// place le dossier
-				$flux['items'][$c]['bt_folder'] = (isset($GLOBALS['liste_flux'][$feedlink]['folder']) ? $GLOBALS['liste_flux'][$feedlink]['folder'] : '' ) ;
 
 			}
 		} else {
@@ -459,39 +414,61 @@ function feed2array($feed_content, $feedlink) {
 
 	} catch (Exception $e) {
 		echo $e-> getMessage();
-		echo ' '.$feedlink." \n";
+		echo ' '.$feed_content." \n";
 		return false;
 	}
 }
 
 /* From the data out of DB, creates JSON, to send to browser
+*
+* @rss_entries : array of entries, as returned by `function liste_elements()`
+* @enclose_in_scripts_tag : if `true`, returns the string in a <script> tag
+*
 */
 function send_rss_json($rss_entries, $enclose_in_script_tag) {
 	// send all the entries data in a JSON format
-	$out = '';
+
+	$out = '{'."\n";
+	$out .= '"sites":'.'[';
+	foreach ($GLOBALS['liste_flux'] as $i => $feed) {
+		$out .= '{'.
+			'"id":'.json_encode($i).', '.
+			'"link":'.json_encode($feed['link'], JSON_UNESCAPED_UNICODE).', '.
+			'"title":'.json_encode($feed['title'], JSON_UNESCAPED_UNICODE).', '.
+			'"checksum":'.json_encode($feed['checksum']).', '.
+			'"time":'.json_encode($feed['time']).', '.
+			'"folder":'.json_encode($feed['folder'], JSON_UNESCAPED_UNICODE).', '.
+			'"iserror":'.json_encode($feed['iserror'], JSON_UNESCAPED_UNICODE).', '.
+			'"nbrun":'.$feed['nbrun'].''.
+		'},';
+	}
+	$out = rtrim(trim($out), ','); // trim out the last ',' (causes JSON error);
+	$out .= '],';
 
 	// RSS entries
-	$out .= '['."\n";
-	$count = count($rss_entries)-1;
+	$out .= '"posts":'.'[';
 	foreach ($rss_entries as $i => $entry) {
-		$out .= '{'.
-			'"id":'.json_encode($entry['bt_id']).', '.
-			'"datetime":'.json_encode($entry['bt_date']).', '.
-			'"feedhash":'.json_encode(crc32($entry['bt_feed'])).', '.
-			'"statut":'.$entry['bt_statut'].', '.
-			'"fav":'.$entry['bt_bookmarked'].', '.
-			'"title":'.json_encode($entry['bt_title']).', '.
-			'"link":'.json_encode($entry['bt_link']).', '.
-			'"sitename":'.json_encode($GLOBALS['liste_flux'][$entry['bt_feed']]['title']).', '.
-			'"folder":'.json_encode($GLOBALS['liste_flux'][$entry['bt_feed']]['folder']).', '.
-			'"content":'.json_encode($entry['bt_content']).''.
-//			'"content":'.json_encode('').''.
-		'}'.(($count==$i) ? '' :',')."\n";
+		if (isset($GLOBALS['liste_flux'][$entry['bt_feed']])) {
+			$out .= '{'.
+				'"id":'.json_encode($entry['bt_id']).', '.
+				'"datetime":'.json_encode($entry['bt_date']).', '.
+				'"feedhash":'.json_encode($entry['bt_feed']).', '.
+				'"statut":'.$entry['bt_statut'].', '.
+				'"fav":'.$entry['bt_bookmarked'].', '.
+				'"title":'.json_encode($entry['bt_title'], JSON_UNESCAPED_UNICODE).', '.
+				'"link":'.json_encode($entry['bt_link']).', '.
+				'"sitename":'.json_encode($GLOBALS['liste_flux'][$entry['bt_feed']]['title'], JSON_UNESCAPED_UNICODE).', '.
+				'"content":'.json_encode($entry['bt_content'], JSON_UNESCAPED_UNICODE).', '.
+				'"folder":'.json_encode($GLOBALS['liste_flux'][$entry['bt_feed']]['folder']).''.
+			'},';
+		}
 	}
+	$out = rtrim(trim($out), ','); // trim out the last ',' (causes JSON error);
 	$out .= ']';
+	$out .= '}';
 
 	if ($enclose_in_script_tag) {
-		$out = '<script type="text/javascript">'.'var rss_entries = {"list": '.$out."\n".'}'.'</script>'."\n";
+		$out = '<script id="json_rss" type="application/json" defer>'.$out.'</script>'."\n";
 	}
 	return $out;
 }

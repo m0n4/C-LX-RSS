@@ -47,11 +47,11 @@ function valider_form_preferences() {
 function valider_form_rss() {
 	$erreurs = array();
 	// check unique-token only on critical actions (session ID check is still there)
-	if (isset($_POST['add-feed']) or isset($_POST['delete_old'])) {
-		if (!( isset($_POST['token']) and check_token($_POST['token'])) ) {
-			$erreurs[] = $GLOBALS['lang']['err_wrong_token'];
-		}
-	}
+	//if (isset($_POST['add-feed']) or isset($_POST['delete_old'])) {
+	//	if (!( isset($_POST['token']) and check_token($_POST['token'])) ) {
+	//		$erreurs[] = $GLOBALS['lang']['err_wrong_token'];
+	//	}
+	//}
 	// on feed add: URL needs to be valid, not empty, and must not already be in DB
 	if (isset($_POST['add-feed'])) {
 		if (empty($_POST['add-feed'])) {

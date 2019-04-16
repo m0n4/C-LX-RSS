@@ -11,6 +11,112 @@ require_once 'inc/boot.php';
 operate_session();
 $GLOBALS['liste_flux'] = open_serialzd_file(FEEDS_DB);
 
+// création du dossier des backups
+creer_dossier(DIR_BACKUP, 0);
+
+
+
+/*
+ *
+ *
+ *
+ *
+ *
+ *  E X P O R T     F U N C T I O N S 
+ */
+
+
+///////////////////////////////////////////////////////////////////////////////////
+//
+// Creates the Zip archive, with several oText data storage folders
+//
+
+function creer_fichier_zip($dossiers) {
+	function addFolder2zip($zip, $folder) {
+		if ($handle = opendir($folder)) {
+			while (FALSE !== ($entry = readdir($handle))) {
+				if ($entry != "." and $entry != ".." and is_readable($folder.'/'.$entry)) {
+					if (is_dir($folder.'/'.$entry)) addFolder2zip($zip, $folder.'/'.$entry);
+					else $zip->addFile($folder.'/'.$entry, preg_replace('#^\.\./#', '', $folder.'/'.$entry));
+			}	}
+			closedir($handle);
+		}
+	}
+
+	foreach($dossiers as $i => $dossier) {
+		$dossiers[$i] = '../'.str_replace(BT_ROOT, '', $dossier); // FIXME : find cleaner way for '../';
+	}
+	$file = 'backup-zip-'.date('Ymd-His').'.zip';
+	$filepath = str_replace(realpath($_SERVER['DOCUMENT_ROOT']), '', __DIR__).'/'.str_replace(BT_ROOT, '', DIR_BACKUP).$file;
+
+	$zip = new ZipArchive;
+	if ($zip->open(DIR_BACKUP.$file, ZipArchive::CREATE) === TRUE) {
+		foreach ($dossiers as $dossier) {
+			addFolder2zip($zip, $dossier);
+		}
+		$zip->close();
+		if (is_file(DIR_BACKUP.$file)) return $filepath;
+	}
+	else return FALSE;
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+//
+// Creates the OPML file
+//
+
+function creer_fichier_opml() {
+	// sort feeds by folder
+	$folders = array();
+	foreach ($GLOBALS['liste_flux'] as $i => $feed) {
+		$folders[$feed['folder']][] = $feed;
+	}
+	ksort($folders);
+
+	$html  = '<?xml version="1.0" encoding="utf-8"?>'."\n";
+	$html .= '<opml version="1.0">'."\n";
+	$html .= "\t".'<head>'."\n";
+	$html .= "\t\t".'<title>Newsfeeds '.BLOGOTEXT_NAME.' '.BLOGOTEXT_VERSION.' on '.date('Y/m/d').'</title>'."\n";
+	$html .= "\t".'</head>'."\n";
+	$html .= "\t".'<body>'."\n";
+
+	function esc($a) {
+		return htmlspecialchars($a, ENT_QUOTES, 'UTF-8');
+	}
+	
+	foreach ($folders as $i => $folder) {
+		$outline = '';
+		foreach ($folder as $j => $feed) {
+			$outline .= ($i ? "\t" : '')."\t\t".'<outline text="'.esc($feed['title']).'" title="'.esc($feed['title']).'" type="rss" xmlUrl="'.esc($feed['link']).'" />'."\n";
+		}
+		if ($i != '') {
+			$html .= "\t\t".'<outline text="'.esc($i).'" title="'.esc($i).'" >'."\n";
+			$html .= $outline;
+			$html .= "\t\t".'</outline>'."\n";	
+		} else {
+			$html .= $outline;
+		}
+	}
+
+	$html .= "\t".'</body>'."\n".'</opml>';
+
+	$file = 'backup-feeds-'.date('Ymd-His').'.opml';
+	$filepath = str_replace(realpath($_SERVER['DOCUMENT_ROOT']), '', __DIR__).'/'.str_replace(BT_ROOT, '', DIR_BACKUP).$file;
+
+	return (file_put_contents(DIR_BACKUP.$file, $html) === FALSE) ? FALSE : $filepath;
+}
+
+
+
+/*
+ *
+ *
+ *
+ *
+ *
+ *  I M P O R T     F U N C T I O N S 
+ */
+
 
 /*
  * reconstruit la BDD des fichiers (en synchronisant la liste des fichiers sur le disque avec les fichiers dans BDD)
@@ -49,7 +155,7 @@ function rebuilt_file_db() {
 	*/
 
 	$query = "SELECT bt_filename, bt_path, ID FROM images";
-	$img_in_db = liste_elements($query, array(), 'images');
+	$img_in_db = liste_elements($query, array());
 
 	$img_in_db_path = array(); foreach ($img_in_db as $i => $img) { $img_in_db_path[] = '/'.$img['bt_path'].'/'.$img['bt_filename']; }
 
@@ -132,79 +238,120 @@ function rebuilt_file_db() {
 		$req->rollBack();
 		return 'Erreur 39787 ajout images du disque dans DB: '.$e->getMessage();
 	}
+
+	/* TODO
+	// fait pareil pour les files/ *
+	foreach ($docs_on_disc as $file) {
+		if (!in_array($file, $files_db)) {
+			$filepath = DIR_DOCUMENTS.$file;
+			$time = filemtime($filepath);
+			$id = date('YmdHis', $time);
+			// vérifie que l’ID ne se trouve pas déjà dans le tableau. Sinon, modifie la date (en allant dans le passé)
+			while (array_key_exists($id, $files_db_id)) { $time--; $id = date('YmdHis', $time); } $files_db_id[] = $id;
+			$ext = strtolower(pathinfo($filepath, PATHINFO_EXTENSION));
+			$new_file = array(
+				'bt_id' => $id,
+				'bt_type' => detection_type_fichier($ext),
+				'bt_fileext' => $ext,
+				'bt_filesize' => filesize($filepath),
+				'bt_filename' => $file,
+				'bt_content' => '',
+				'bt_wiki_content' => '',
+				'bt_dossier' => 'default',
+				'bt_checksum' => sha1_file($filepath),
+				'bt_statut' => 0,
+				'bt_path' => '',
+			);
+			// l’ajoute au tableau
+			$GLOBALS['liste_fichiers'][] = $new_file;
+		}
+	}
+	// tri le tableau fusionné selon les bt_id (selon une des clés d'un sous tableau).
+	$GLOBALS['liste_fichiers'] = tri_selon_sous_cle($GLOBALS['liste_fichiers'], 'bt_id');
+	// finalement enregistre la liste des fichiers.
+	file_put_contents(FILES_DB, '<?php /* '.chunk_split(base64_encode(serialize($GLOBALS['liste_fichiers']))).' * /');
+	*/
 }
 
 
-/* AJOUTE TOUS LES DOSSIERS DU TABLEAU $dossiers DANS UNE ARCHIVE ZIP */
-function addFolder2zip($zip, $folder) {
-	if ($handle = opendir($folder)) {
-		while (FALSE !== ($entry = readdir($handle))) {
-			if ($entry != "." and $entry != ".." and is_readable($folder.'/'.$entry)) {
-				if (is_dir($folder.'/'.$entry)) addFolder2zip($zip, $folder.'/'.$entry);
-				else $zip->addFile($folder.'/'.$entry, preg_replace('#^\.\./#', '', $folder.'/'.$entry));
-		}	}
-		closedir($handle);
+/*
+ * liste une table (ex: les commentaires) et comparre avec un tableau de commentaires trouvées dans l’archive
+ * Retourne un tableau avec les éléments absents de la base
+ */
+function diff_trouve_base($table, $tableau_trouve) {
+	$tableau_base = $tableau_absents = array();
+	try {
+		$req = $GLOBALS['db_handle']->prepare('SELECT bt_id FROM '.$table);
+		$req->execute();
+		while ($ligne = $req->fetch()) {
+			$tableau_base[] = $ligne['bt_id'];
+		}
+	} catch (Exception $e) {
+		die('Erreur 20959 : diff_trouve_base avec les "'.$table.'" : '.$e->getMessage());
 	}
+
+	// remplit le tableau
+	foreach ($tableau_trouve as $key => $element) {
+		if (!in_array($element['bt_id'], $tableau_base)) $tableau_absents[] = $element;
+	}
+	return $tableau_absents;
 }
 
-function creer_fichier_zip($dossiers) {
-	foreach($dossiers as $i => $dossier) {
-		$dossiers[$i] = str_replace(BT_ROOT, '', $dossier); // FIXME : find cleaner way for '../';
-	}
-	$file = 'archive_site-'.date('Ymd').'-'.substr(md5(rand(10,99)),3,5).'.zip';
-	$filepath = str_replace(BT_ROOT, '', DIR_BACKUP).$file;
+/* IMPORTER UN FICHIER json AU FORMAT DE oTEXT */
+function import_json_file($json) {
+	$data = json_decode($json, true);
+	$return = array();
+	$flag_has_comms = false;
 
-	$zip = new ZipArchive;
-	if ($zip->open(DIR_BACKUP.$file, ZipArchive::CREATE) === TRUE) {
-		foreach ($dossiers as $dossier) {
-			addFolder2zip($zip, $dossier);
+	try {
+		$GLOBALS['db_handle']->beginTransaction();
+
+		foreach ($data as $type => $array_type) {
+			// get only items that are not yet in DB (base on bt_identification)
+			$data[$type] = diff_trouve_base($type, $array_type);
+			$return[$type] = count($data[$type]);
+			if ($return[$type]) {
+
+				switch ($type) {
+					case 'articles':
+						foreach($data[$type] as $art) {
+							$query = 'INSERT INTO articles ( bt_type, bt_id, bt_date, bt_title, bt_abstract, bt_notes, bt_link, bt_content, bt_wiki_content, bt_tags, bt_keywords, bt_nb_comments, bt_allow_comments, bt_statut ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )';
+							$array = array( $art['bt_type'], $art['bt_id'], $art['bt_date'], $art['bt_title'], $art['bt_abstract'], $art['bt_notes'], $art['bt_link'], $art['bt_content'], $art['bt_wiki_content'], $art['bt_tags'], $art['bt_keywords'], $art['bt_nb_comments'], $art['bt_allow_comments'], $art['bt_statut'] );
+							$req = $GLOBALS['db_handle']->prepare($query);
+							$req->execute($array);
+						}
+						break;
+
+					case 'commentaires':
+						foreach($data[$type] as $com) {
+							if (preg_match('#\d{14}#', $com['bt_article_id'])) {
+								$com['bt_article_id'] = substr(md5($com['bt_article_id']), 0, 6);
+							}
+
+							$query = 'INSERT INTO commentaires (bt_type, bt_id, bt_article_id, bt_content, bt_wiki_content, bt_author, bt_link, bt_webpage, bt_email, bt_subscribe, bt_statut) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+							$array = array($com['bt_type'], $com['bt_id'], $com['bt_article_id'], $com['bt_content'], $com['bt_wiki_content'], $com['bt_author'], $com['bt_link'], $com['bt_webpage'], $com['bt_email'], $com['bt_subscribe'], $com['bt_statut']);
+							$req = $GLOBALS['db_handle']->prepare($query);
+							$req->execute($array);
+							$flag_has_comms = true;
+						}
+						break;
+
+				} // end switch
+			} // end if
+		} // end forearch
+
+		$GLOBALS['db_handle']->commit();
+
+		if ($flag_has_comms === true) {
+			recompte_commentaires();
 		}
-		$zip->close();
-		if (is_file(DIR_BACKUP.$file)) return $filepath;
-	}
-	else return FALSE;
-}
 
-/* Crée la liste des RSS et met tout ça dans un fichier OPML */
-function creer_fichier_opml() {
-	// sort feeds by folder
-	$folders = array();
-	foreach ($GLOBALS['liste_flux'] as $i => $feed) {
-		$folders[$feed['folder']][] = $feed;
-	}
-	ksort($folders);
-
-	$html  = '<?xml version="1.0" encoding="utf-8"?>'."\n";
-	$html .= '<opml version="1.0">'."\n";
-	$html .= "\t".'<head>'."\n";
-	$html .= "\t\t".'<title>Newsfeeds '.BLOGOTEXT_NAME.' '.BLOGOTEXT_VERSION.' on '.date('Y/m/d').'</title>'."\n";
-	$html .= "\t".'</head>'."\n";
-	$html .= "\t".'<body>'."\n";
-	function esc($a) {
-		return htmlspecialchars($a, ENT_QUOTES, 'UTF-8');
+	} catch (Exception $e) {
+		$req->rollBack();
+		die('Erreur 7241 on import JSON : '.$e->getMessage());
 	}
 
-	foreach ($folders as $i => $folder) {
-		$outline = '';
-		foreach ($folder as $j => $feed) {
-			$outline .= ($i ? "\t" : '')."\t\t".'<outline text="'.esc($feed['title']).'" title="'.esc($feed['title']).'" type="rss" xmlUrl="'.esc($feed['link']).'" />'."\n";
-		}
-		if ($i != '') {
-			$html .= "\t\t".'<outline text="'.esc($i).'" title="'.esc($i).'" >'."\n";
-			$html .= $outline;
-			$html .= "\t\t".'</outline>'."\n";	
-		} else {
-			$html .= $outline;
-		}
-	}
-
-	$html .= "\t".'</body>'."\n".'</opml>';
-
-	// écriture du fichier
-	$file = 'backup-data-'.date('Ymd-His').'.opml';
-	$filepath = str_replace(BT_ROOT, '', DIR_BACKUP).$file;
-	return (file_put_contents(DIR_BACKUP.$file, $html) === FALSE) ? FALSE : $filepath;
-
+	return $return;
 }
 
 // Parse et importe un fichier de liste de flux OPML
@@ -221,11 +368,12 @@ function importer_opml($opml_content) {
 				$GLOBALS['array_new'][$url] = array(
 					'link' => $url,
 					'title' => ucfirst($title),
-					'favicon' => 'style/rss-feed-icon.png',
+					'favicon' => '',
 					'checksum' => '0',
 					'time' => '0',
 					'folder' => (string)$folder,
 					'iserror' => 0,
+					'nbrun' => 0,
 				);
 			}
 	 		parseOpmlRecursive($child);
@@ -242,16 +390,14 @@ function importer_opml($opml_content) {
 	return (count($GLOBALS['liste_flux']) - $old_len);
 }
 
+
+
 // DEBUT PAGE
 afficher_html_head($GLOBALS['lang']['titre_maintenance'], "maintenance");
 afficher_topnav($GLOBALS['lang']['titre_maintenance'], ''); #top
 
 echo '<div id="axe">'."\n";
 echo '<div id="page">'."\n";
-
-// création du dossier des backups
-creer_dossier(DIR_BACKUP, 0);
-
 
 /*
  * Affiches les formulaires qui demandent quoi faire.
@@ -279,10 +425,8 @@ if (!isset($_GET['do']) and !isset($_FILES['file'])) {
 	// choose export what ?
 		echo '<fieldset>'."\n";
 		echo '<legend class="legend-backup">'.$GLOBALS['lang']['maintenance_export'].'</legend>';
-		echo "\t".'<p><label for="opml">'.$GLOBALS['lang']['bak_export_opml'].'</label>'.
-			'<input type="radio" name="exp-format" value="opml"  id="opml"  onchange="switch_export_type(\'e_opml\')"  /></p>'."\n";
-		echo "\t".'<p><label for="zip">'.$GLOBALS['lang']['bak_export_zip'].'</label>'.
-			'<input type="radio" name="exp-format" value="zip"  id="zip"  onchange="switch_export_type(\'e_zip\')"  /></p>'."\n";
+		echo "\t".'<p><label for="opml">'.$GLOBALS['lang']['bak_export_opml'].'</label><input type="radio" name="exp-format" value="opml" id="opml" onchange="switch_export_type(\'\')" /></p>'."\n";
+		echo "\t".'<p><label for="zip">'.$GLOBALS['lang']['bak_export_zip'].'</label><input type="radio" name="exp-format" value="zip" id="zip" onchange="switch_export_type(\'e_zip\')" /></p>'."\n";
 		echo '</fieldset>'."\n";
 
 		// export data in zip
@@ -301,12 +445,12 @@ if (!isset($_GET['do']) and !isset($_FILES['file'])) {
 
 	// Form import
 	$importformats = array(
-		'rssopml' => $GLOBALS['lang']['bak_import_rssopml']
+		'rssopml' => $GLOBALS['lang']['bak_import_rssopml'],
 	);
 	echo '<form action="maintenance.php" method="post" enctype="multipart/form-data" class="bordered-formbloc" id="form_import">'."\n";
 		echo '<fieldset class="pref valid-center">';
 		echo '<legend class="legend-backup">'.$GLOBALS['lang']['maintenance_import'].'</legend>';
-		echo "\t".'<p>'.form_select_no_label('imp-format', $importformats, 'jsonbak');
+		echo "\t".'<p>'.form_select('imp-format', $importformats, 'jsonbak', '');
 		echo '<input type="file" name="file" id="file" class="text" /></p>'."\n";
 		echo '</fieldset>'."\n";
 		echo '<p class="submit-bttns">'."\n";
@@ -322,13 +466,11 @@ if (!isset($_GET['do']) and !isset($_FILES['file'])) {
 		echo '<fieldset class="pref valid-center">';
 		echo '<legend class="legend-sweep">'.$GLOBALS['lang']['maintenance_optim'].'</legend>';
 
-		echo "\t".'<p>'.select_yes_no('opti-file', 0, $GLOBALS['lang']['bak_opti_miniature']).'</p>'."\n";
 		if (DBMS == 'sqlite') {
 			echo "\t".'<p>'.select_yes_no('opti-vacu', 0, $GLOBALS['lang']['bak_opti_vacuum']).'</p>'."\n";
 		} else {
 			echo hidden_input('opti-vacu', 0);
 		}
-		echo "\t".'<p>'.select_yes_no('opti-comm', 0, $GLOBALS['lang']['bak_opti_recountcomm']).'</p>'."\n";
 		echo "\t".'<p>'.select_yes_no('opti-rss', 0, $GLOBALS['lang']['bak_opti_supprreadrss']).'</p>'."\n";
 		echo '</fieldset>'."\n";
 		echo '<p class="submit-bttns">'."\n";
@@ -355,21 +497,9 @@ if (!isset($_GET['do']) and !isset($_FILES['file'])) {
 		// token : ok, go on !
 		if (isset($_GET['do'])) {
 			if ($_GET['do'] == 'export') {
-				// Export a ZIP archive
-				if (@$_GET['exp-format'] == 'zip') {
-					$dossiers = array();
-					if (isset($_GET['incl-sqlit'])) {
-						$dossiers[] = DIR_DATABASES;
-					}
-					if (isset($_GET['incl-confi'])) {
-						$dossiers[] = DIR_CONFIG;
-					}
-					$file_archive = creer_fichier_zip($dossiers);
-
-				// Export a OPML rss lsit
-				} elseif (@$_GET['exp-format'] == 'opml') {
+				// Export a OPML rss list
+				if (@$_GET['exp-format'] == 'opml') {
 					$file_archive = creer_fichier_opml();
-
 				} else {
 					echo 'nothing to do';
 				}
@@ -386,6 +516,7 @@ if (!isset($_GET['do']) and !isset($_FILES['file'])) {
 				}
 
 			} elseif ($_GET['do'] == 'optim') {
+					// recount files DB
 					// vacuum SQLite DB
 					if ($_GET['opti-vacu'] == 1) {
 						try {
@@ -445,8 +576,6 @@ if (!isset($_GET['do']) and !isset($_FILES['file'])) {
 
 echo '</div>'."\n";
 
-
-echo "\n".'<script src="style/javascript.js" type="text/javascript"></script>'."\n";
+echo "\n".'<script src="style/scripts/javascript.js"></script>'."\n";
 
 footer($begin);
-

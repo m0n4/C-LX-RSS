@@ -6,7 +6,6 @@
 // See "LICENSE" file for info.
 // *** LICENSE ***
 
-
 if (!defined('IS_IT_INSTALL')) {
 	if ( !file_exists('config/user.ini') || !file_exists('config/prefs.php') ) {
 		header('Location: install.php');
@@ -22,13 +21,13 @@ $begin = microtime(true);
 mb_internal_encoding('UTF-8');
 mb_substitute_character('none');
 
+// Root folder. Might be defined in /admin/boot files.
+if (!defined('BT_ROOT')) {
+	define('BT_ROOT', dirname(dirname(__file__)).'/');
+}
 
-define('IS_IN_ADMIN', true);
-define('BT_ROOT_ADMIN', dirname(dirname(dirname(__file__))).'/');
-define('BT_ROOT', dirname(dirname(__file__)).'/');
 // if dev mod
 error_reporting(-1);
-
 
 /**
  * Import several .ini config files with this function
@@ -47,10 +46,7 @@ function import_ini_file($file_path) {
 	return false;
 }
 
-
-
 // Constants: folders
-define('DIR_ADMIN', BT_ROOT.'admin/');
 define('DIR_DATABASES', BT_ROOT.'databases/');
 define('DIR_CONFIG', BT_ROOT.'config/');
 
@@ -70,14 +66,20 @@ define('FILE_SETTINGS_ADV', DIR_CONFIG.'config-advanced.ini');
 define('FILE_MYSQL', DIR_CONFIG.'mysql.ini');
 
 // Constants: general
-define('BLOGOTEXT_NAME', 'CLX-RSS');
-define('BLOGOTEXT_SITE', 'https://lehollandaisvolant.net/');
-define('BLOGOTEXT_VERSION', '1808-1');
-define('MINIMAL_PHP_REQUIRED_VERSION', '5.5');
+define('BLOGOTEXT_NAME', 'CLX');
+define('BLOGOTEXT_SITE', 'https://github.com/timovn/C-LX-RSS');
+define('BLOGOTEXT_VERSION', '1904-1');
+define('MINIMAL_PHP_REQUIRED_VERSION', '5.6');
 define('BLOGOTEXT_UA', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0');
 
+// init some vars
 // ADVANCED CONFIG OPTIONS
 import_ini_file(FILE_SETTINGS_ADV);
+if (defined('CUSTOM_DIR_ADMIN')) {
+	define('DIR_ADMIN', BT_ROOT.CUSTOM_DIR_ADMIN.'/');
+} else {
+	define('DIR_ADMIN', BT_ROOT.'admin/');
+}
 
 // DATABASE OPTIONS + MySQL DB PARAMS
 import_ini_file(FILE_MYSQL);
@@ -87,6 +89,9 @@ import_ini_file(FILE_USER);
 
 // USER PREFS
 if (file_exists(FILE_SETTINGS)) { require_once FILE_SETTINGS; }
+
+// GLOBAL TIMEZONE (from prefs)
+date_default_timezone_set($GLOBALS['fuseau_horaire']);
 
 // Constantes: URL
 define('URL_ROOT', $GLOBALS['racine'] . ((strrpos($GLOBALS['racine'], '/', -1) === false) ? '/' : '' ));
@@ -107,5 +112,4 @@ require_once BT_ROOT.'inc/sqli.php';
 if (!defined('IS_IT_INSTALL')) {
 	$GLOBALS['db_handle'] = open_base();
 }
-
 

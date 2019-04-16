@@ -40,7 +40,7 @@ if (isset($_POST['_verif_envoi']) and valider_form() === TRUE) { // OK : getting
 
 	if (!empty($_POST['stay_logged'])) { // if user wants to stay logged
 		$user_id = hash('sha256', USER_PWHASH.USER_LOGIN.md5($_SERVER['HTTP_USER_AGENT'].$ip));
-		setcookie('BT-admin-stay-logged', $user_id, time()+365*24*60*60, null, null, false, true);
+		setcookie('BT-admin-stay-logged', $user_id, time()+365*24*60*60, null, null, isHTTPS(), true);
 		session_set_cookie_params(365*24*60*60); // set expiration time to the browser
 	} else {
 		$_SESSION['stay_logged_mode'] = 0;
@@ -66,15 +66,15 @@ if (isset($_POST['_verif_envoi']) and valider_form() === TRUE) { // OK : getting
 		echo '<div id="axe">'."\n";
 		echo '<div id="pageauth">'."\n";
 		echo '<h1>'.BLOGOTEXT_NAME.'</h1>'."\n";
-		echo '<form method="post" action="auth.php">'."\n";
 		echo '<div id="auth">'."\n";
+		echo '<form method="post" action="auth.php">'."\n";
 		echo '<p><label for="user">'.ucfirst($GLOBALS['lang']['label_dp_identifiant']).'</label><input class="text" type="text"  autocomplete="off" id="user" name="nom_utilisateur" placeholder="John Doe" value="" /></p>'."\n";
 		echo '<p><label for="password">'.ucfirst($GLOBALS['lang']['label_dp_motdepasse']).'</label><input class="text" id="password" type="password" placeholder="••••••••••••" name="mot_de_passe" value="" /></p>'."\n";
 		echo '<p><input type="checkbox" id="stay_logged" name="stay_logged" checked class="checkbox" /><label for="stay_logged">'.$GLOBALS['lang']['label_stay_logged'].'</label></p>'."\n";
 		echo '<button class="submit button-submit" type="submit" name="submit">'.$GLOBALS['lang']['connexion'].'</button>'."\n";
 		echo '<input type="hidden" name="_verif_envoi" value="1" />'."\n";
-		echo '</div>'."\n";
 		echo '</form>'."\n";
+		echo '</div>'."\n";
 }
 
 function valider_form() {
@@ -84,6 +84,6 @@ function valider_form() {
 	return TRUE;
 }
 
-echo "\n".'<script src="style/javascript.js" type="text/javascript"></script>'."\n";
+echo "\n".'<script src="style/scripts/javascript.js"></script>'."\n";
 footer();
 

@@ -15,12 +15,12 @@ function redirection($url) {
 
 function decode_id($id) {
 	$retour = array(
-		'annee' => substr($id, 0, 4),
-		'mois' => substr($id, 4, 2),
-		'jour' => substr($id, 6, 2),
-		'heure' => substr($id, 8, 2),
-		'minutes' => substr($id, 10, 2),
-		'secondes' => substr($id, 12, 2)
+		'y' => substr($id, 0, 4),
+		'm' => substr($id, 4, 2),
+		'd' => substr($id, 6, 2),
+		'h' => substr($id, 8, 2),
+		'i' => substr($id, 10, 2),
+		's' => substr($id, 12, 2)
 		);
 	return $retour;
 }
@@ -28,8 +28,38 @@ function decode_id($id) {
 // Returns the URL of a blog post (with it’s id and title)
 
 function get_blogpath($id, $titre) {
-	$path = $GLOBALS['racine'].'?d='.$id.'--'.trim(diacritique($titre), '-');
+
+	if (strlen($id) === 14 and preg_match('#\d{14}#', $id)) {
+		$date = decode_id($id);
+		$path = '?d='.$date['y'].'/'.$date['m'].'/'.$date['d'].'/'.$date['h'].'/'.$date['i'].'/'.$date['s'].'-'.titre_url($titre);
+	}
+	else {
+		$path = '?d='.$id.'--'.trim(diacritique($titre), '-');
+	}
 	return $path;
+}
+
+/*function get_blogpath($id, $titre) {
+
+	if (strlen($id) === 14 and preg_match('#\d{14}#', $id)) {
+		$date = decode_id($id);
+		$path = $GLOBALS['racine'].'?d='.$date['y'].'/'.$date['m'].'/'.$date['d'].'/'.$date['h'].'/'.$date['i'].'/'.$date['s'].'-'.titre_url($titre);
+	}
+	else {
+		$path = $GLOBALS['racine'].'?d='.$id.'--'.trim(diacritique($titre), '-');
+	}
+	return $path;
+}*/
+function article_anchor($id) {
+	$anchor = 'id'.substr(md5($id), 0, 6);
+	return $anchor;
+}
+
+function traiter_tags($tags) {
+	$tags_array = explode(',' , trim($tags, ','));
+	$tags_array = array_unique(array_map('trim', $tags_array));
+	sort($tags_array);
+	return implode(', ' , $tags_array);
 }
 
 // tri un tableau non pas comme "sort()" sur l’ID, mais selon une sous clé d’un tableau.
@@ -55,7 +85,11 @@ function check_session() {
 	}
 	ini_set('session.cookie_httponly', TRUE);
 	session_set_cookie_params(365*24*60*60); // set new expiration time to the browser
-	@session_start();
+	@session_start([
+		'cookie_lifetime' => 86400*365,
+		'cookie_secure'   => isHTTPS(),
+		'cookie_httponly' => true,
+	]);
 
 	// generate hash for cookie
 	$newUID = hash('sha256', USER_PWHASH.USER_LOGIN.md5($_SERVER['HTTP_USER_AGENT'].$ip));
@@ -97,10 +131,14 @@ function operate_session() {
 
 function fermer_session() {
 	unset($_SESSION['nom_utilisateur'], $_SESSION['user_id'], $_SESSION['tokens']);
-	setcookie('BT-admin-stay-logged', NULL);
+	setcookie('BT-admin-stay-logged', null, time()-3600, null, null, isHTTPS(), true);
+
 	session_destroy(); // destroy session
 	// Saving server-side the possible lost data (writing article for example)
-	session_start();
+	session_start([
+		'cookie_secure'   => isHTTPS(),
+		'cookie_httponly' => true,
+	]);
 	session_regenerate_id(true); // change l'ID au cas ou
 	foreach($_POST as $key => $value){
 		$_SESSION['BT-post-'.$key] = $value;
@@ -156,6 +194,7 @@ function remove_url_param($param) {
 	return '';
 }
 
+
 /* search query parsing (operators, exact matching, etc) */
 function parse_search($q) {
 	if (preg_match('#^\s?"[^"]*"\s?$#', $q)) { // exact match
@@ -188,4 +227,8 @@ function rm_dots_dir($array) {
 	if (($key = array_search('..', $array)) !== FALSE) { unset($array[$key]); }
 	if (($key = array_search('.', $array)) !== FALSE) { unset($array[$key]); }
 	return ($array);
+}
+
+function isHTTPS() {
+	return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443;
 }

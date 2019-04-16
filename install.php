@@ -6,7 +6,6 @@
 // See "LICENSE" file for info.
 // *** LICENSE ***
 
-
 define('IS_IT_INSTALL', true);
 
 // install or reinstall with same config ?
@@ -38,6 +37,7 @@ if (isset($_GET['l'])) {
 }
 
 require_once 'inc/boot.php';
+require_once 'inc/lang.php';
 
 if (isset($_GET['s']) and is_numeric($_GET['s'])) {
 	$GLOBALS['step'] = $_GET['s'];
@@ -66,7 +66,7 @@ elseif ($GLOBALS['step'] == '2') {
 		} else {
 			creer_dossier(DIR_CONFIG, 1);
 			creer_dossier(DIR_DATABASES, 1);
-			creer_dossier(DIR_VAR, 0);
+			creer_dossier(DIR_VAR, 1);
 			fichier_user();
 			import_ini_file(DIR_CONFIG.'user.ini');
 
@@ -90,7 +90,7 @@ elseif ($GLOBALS['step'] == '2') {
 				fichier_mysql('sqlite');
 			}
 			traiter_install_3();
-			if (!file_exists('../config/config-advanced.ini')) {
+			if (!file_exists('config/config-advanced.ini')) {
 				fichier_adv_conf(); // is done right after DB init
 			}
 			redirection('auth.php');
@@ -116,19 +116,11 @@ function afficher_form_1($erreurs='') {
 	}
 	// pdo_sqlite and pdo_mysql (minimum one is required)
 	if (!extension_loaded('pdo_sqlite') and !extension_loaded('pdo_mysql') ) {
-		$conferrors[] = "\t".'<li>Neither <b>pdo_sqlite</b> or <b>pdo_mysql</b> PHP-modules are loaded. Blogotext needs at least one.</li>'."\n";
-	}
-	// check cUrl
-	if (!extension_loaded('curl')) {
-		$conferrors[] = "\t".'<li>cURL is not installed. oText-RSS requires "php-curl" module to be installed and active.</li>'."\n";
-	}
-	// check libXML
-	if (!extension_loaded('libxml')) {
-		$conferrors[] = "\t".'<li>LibXML is not installed. oText-RSS requires "php-libxml" module to be installed and active.</li>'."\n";
+		$conferrors[] = "\t".'<li>Neither <b>pdo_sqlite</b> or <b>pdo_mysql</b> PHP-modules are loaded. Blogotext needs at least one (SQLite recommended).</li>'."\n";
 	}
 	// check directory readability
 	if (!is_writable('../') ) {
-		$conferrors[] = "\t".'<li>Blogotext has no write rights (chmod of home folder must be 644 at least, 777 recommended).</li>'."\n";
+		$conferrors[] = "\t".'<li>Blogotext has no write rights (chmod of home folder must be 644 at least).</li>'."\n";
 	}
 	if (!empty($conferrors)) {
 		echo '<ol class="erreurs">'."\n";
@@ -139,15 +131,15 @@ function afficher_form_1($erreurs='') {
 		die;
 	}
 
-	echo '<form method="post" action="install.php">'."\n";
 	echo '<div id="install">'."\n";
+	echo '<form method="post" action="install.php">'."\n";
 	echo '<p>';
-	form_langue_install('Choisissez votre langue / Choose your language: ');
+	echo form_select('langue', $GLOBALS['langs'], '', 'Choisissez votre langue / Choose your language: ');
 	echo hidden_input('verif_envoi_1', '1');
 	echo '</p>';
 	echo '<button class="submit button-submit" type="submit" name="enregistrer">Ok</button>'."\n";
-	echo '<div>'."\n";
 	echo '</form>'."\n";
+	echo '<div>'."\n";
 }
 
 // form pour login + mdp + url
@@ -158,8 +150,8 @@ function afficher_form_2($erreurs='') {
 	echo '<h1>'.BLOGOTEXT_NAME.'</h1>'."\n";
 	echo '<h1 id="step">'.$GLOBALS['lang']['install'].'</h1>'."\n";
 	echo erreurs($erreurs);
-	echo '<form method="post" action="install.php?s='.$GLOBALS['step'].'&amp;l='.$GLOBALS['lang']['id'].'">'."\n".'<div id="erreurs_js" class="erreurs"></div>'."\n";
 	echo '<div id="install">'."\n";
+	echo '<form method="post" action="install.php?s='.$GLOBALS['step'].'&amp;l='.$GLOBALS['lang']['id'].'">'."\n".'<div id="erreurs_js" class="erreurs"></div>'."\n";
 	echo '<p>';
 	echo '<label for="identifiant">'.$GLOBALS['lang']['install_id'].' </label><input type="text" name="identifiant" id="identifiant" size="30" value="" class="text" placeholder="John Doe" required />'."\n";
 	echo '</p>'."\n";
@@ -174,8 +166,8 @@ function afficher_form_2($erreurs='') {
 	echo hidden_input('langue', $GLOBALS['lang']['id']);
 	echo hidden_input('verif_envoi_2', '1');
 	echo '<button class="submit button-submit" type="submit" name="enregistrer">Ok</button>'."\n";
-	echo '</div>'."\n";
 	echo '</form>'."\n";
+	echo '</div>'."\n";
 }
 
 
@@ -188,8 +180,8 @@ function afficher_form_3($erreurs='') {
 	echo '<h1>'.BLOGOTEXT_NAME.'</h1>'."\n";
 	echo '<h1 id="step">'.$GLOBALS['lang']['install'].'</h1>'."\n";
 	echo erreurs($erreurs);
-	echo '<form method="post" action="'.basename($_SERVER['SCRIPT_NAME']).'?'.$_SERVER['QUERY_STRING'].'">'."\n";
 	echo '<div id="install">'."\n";
+	echo '<form method="post" action="'.basename($_SERVER['SCRIPT_NAME']).'?'.$_SERVER['QUERY_STRING'].'">'."\n";
 	echo '<p><label>'.$GLOBALS['lang']['install_choose_sgdb'].'</label>';
 	echo '<select id="sgdb" name="sgdb" onchange="show_mysql_form()">'."\n";
 	if (extension_loaded('pdo_sqlite')) {
@@ -217,8 +209,8 @@ function afficher_form_3($erreurs='') {
 	echo hidden_input('verif_envoi_3', '1');
 	echo '<button class="submit button-submit" type="submit" name="enregistrer">Ok</button>'."\n";
 
-	echo '</div>'."\n";
 	echo '</form>'."\n";
+	echo '</div>'."\n";
 
 }
 
@@ -297,7 +289,7 @@ function test_connection_mysql() {
 }
 
 
-echo '<script type="text/javascript">
+echo '<script>
 function getSelectSgdb() {
 	var selectElmt = document.getElementById("sgdb");
 	if (!selectElmt) return false;
@@ -327,4 +319,3 @@ function revealpass(fieldId) {
 </script>'."\n";
 
 footer();
-

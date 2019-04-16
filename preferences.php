@@ -29,8 +29,24 @@ function afficher_form_prefs($erreurs = '') {
 		$fld_user .= "\t".'<input type="text" id="auteur" name="auteur" size="30" value="'.(empty($GLOBALS['auteur']) ? htmlspecialchars(USER_LOGIN) : $GLOBALS['auteur']).'" class="text" />'."\n";
 		$fld_user .= '</p>'."\n";
 		$fld_user .= '<p>'."\n";
+		$fld_user .= "\t".'<label for="email">'.$GLOBALS['lang']['pref_email'].'</label>'."\n";
+		$fld_user .= "\t".'<input type="text" id="email" name="email" size="30" value="'.$GLOBALS['email'].'" class="text" />'."\n";
+		$fld_user .= '</p>'."\n";
+		$fld_user .= '<p hidden>'."\n";
+		$fld_user .= "\t".'<label for="nomsite">'.$GLOBALS['lang']['pref_nom_site'].'</label>'."\n";
+		$fld_user .= "\t".'<input type="text" id="nomsite" name="nomsite" size="30" value="'.$GLOBALS['nom_du_site'].'" class="text" />'."\n";
+		$fld_user .= '</p>'."\n";
+		$fld_user .= '<p>'."\n";
 		$fld_user .= "\t".'<label for="racine">'.$GLOBALS['lang']['pref_racine'].'</label>'."\n";
 		$fld_user .= "\t".'<input type="text" id="racine" name="racine" size="30" value="'.$GLOBALS['racine'].'" class="text" />'."\n";
+		$fld_user .= '</p>'."\n";
+		$fld_user .= '<p hidden>'."\n";
+		$fld_user .= "\t".'<label for="description">'.$GLOBALS['lang']['label_dp_description'].'</label>'."\n";
+		$fld_user .= "\t".'<textarea id="description" name="description" cols="35" rows="2" class="text" >'.$GLOBALS['description'].'</textarea>'."\n";
+		$fld_user .= '</p>'."\n";
+		$fld_user .= '<p hidden>'."\n";
+		$fld_user .= "\t".'<label for="keywords">'.$GLOBALS['lang']['pref_keywords'].'</label>';
+		$fld_user .= "\t".'<textarea id="keywords" name="keywords" cols="35" rows="2" class="text" >'.$GLOBALS['keywords'].'</textarea>'."\n";
 		$fld_user .= '</p>'."\n";
 		$fld_user .= '</div>'."\n";
 		$fld_user .= $submit_box;
@@ -61,13 +77,32 @@ function afficher_form_prefs($erreurs = '') {
 		$fld_dateheure .= '<div class="form-legend"><legend class="legend-dateheure">'.$GLOBALS['lang']['prefs_legend_langdateheure'].'</legend></div>'."\n";
 		$fld_dateheure .= '<div class="form-lines">'."\n";
 		$fld_dateheure .= '<p>'."\n";
-		$fld_dateheure .= form_langue($GLOBALS['lang']['id']);
+		$fld_dateheure .= form_select('langue', $GLOBALS['langs'], $GLOBALS['lang']['id'], $GLOBALS['lang']['pref_langue']);
 		$fld_dateheure .= '</p>'."\n";
 		$fld_dateheure .= '<p>'."\n";
-		$fld_dateheure .= form_format_date($GLOBALS['format_date']);
+		$jour_l = jour_en_lettres(date('d'), date('m'), date('Y'));
+		$mois_l = mois_en_lettres(date('m'));
+		$opts = array (
+			'0' => date('d/m/Y'),                                     // 05/07/2011
+			'1' => date('m/d/Y'),                                     // 07/05/2011
+			'2' => date('d').' '.$mois_l.' '.date('Y'),               // 05 juillet 2011
+			'3' => $jour_l.' '.date('d').' '.$mois_l.' '.date('Y'),   // mardi 05 juillet 2011
+			'4' => $jour_l.' '.date('d').' '.$mois_l,                 // mardi 05 juillet
+			'5' => $mois_l.' '.date('d').', '.date('Y'),              // juillet 05, 2011
+			'6' => $jour_l.', '.$mois_l.' '.date('d').', '.date('Y'), // mardi, juillet 05, 2011
+			'7' => date('Y-m-d'),                                     // 2011-07-05
+			'8' => substr($jour_l,0,3).'. '.date('d').' '.$mois_l,    // ven. 14 janvier
+		);
+		$fld_dateheure .= form_select('format_date', $opts, $GLOBALS['format_date'], $GLOBALS['lang']['pref_format_date']);
 		$fld_dateheure .= '</p>'."\n";
 		$fld_dateheure .= '<p>'."\n";
-		$fld_dateheure .= form_format_heure($GLOBALS['format_heure']);
+		$opts = array (
+			'0' => date('H\:i\:s'),   // 23:56:04
+			'1' => date('H\:i'),      // 23:56
+			'2' => date('h\:i\:s A'), // 11:56:04 PM
+			'3' => date('h\:i A'),    // 11:56 PM
+		);
+		$fld_dateheure .= form_select('format_heure', $opts, $GLOBALS['format_heure'], $GLOBALS['lang']['pref_format_heure']);
 		$fld_dateheure .= '</p>'."\n";
 		$fld_dateheure .= '<p>'."\n";
 		$fld_dateheure .= form_fuseau_horaire($GLOBALS['fuseau_horaire']);
@@ -87,13 +122,11 @@ function afficher_form_prefs($erreurs = '') {
 		$fld_cfg_rss .= '<p>'."\n";
 		$a = explode('/', dirname($_SERVER['SCRIPT_NAME']));
 		$fld_cfg_rss .= '<label>'.$GLOBALS['lang']['pref_label_crontab_rss'].'</label>'."\n";
-		$fld_cfg_rss .= '<a onclick="prompt(\''.$GLOBALS['lang']['pref_alert_crontab_rss'].'\', \'0 *  *   *   *   wget --spider -qO- '.$GLOBALS['racine'].$a[count($a)-1].'/_rss.ajax.php?guid='.BLOG_UID.'&refresh_all'.'\');return false;" href="#">Afficher ligne Cron</a>';
+		$fld_cfg_rss .= '<a onclick="prompt(\''.$GLOBALS['lang']['pref_alert_crontab_rss'].'\', \'0 *  *   *   *   wget --spider -qO- '.$GLOBALS['racine'].$a[count($a)-1].'/ajax/rss.ajax.php?guid='.BLOG_UID.'&refresh_all'.'\');return false;" href="#">Afficher ligne Cron</a>';
 		$fld_cfg_rss .= '</p>'."\n";
 		$fld_cfg_rss .= '<p>'."\n";
 		$fld_cfg_rss .= "\t".'<label>'.$GLOBALS['lang']['pref_rss_go_to_imp-export'].'</label>'."\n";
 		$fld_cfg_rss .= "\t".'<a href="maintenance.php">'.$GLOBALS['lang']['label_import-export'].'</a>'."\n";
-		$fld_cfg_rss .= '</p>'."\n";
-		$fld_cfg_rss .= '<p>'."\n";
 		$fld_cfg_rss .= '</p>'."\n";
 		$fld_cfg_rss .= '</div>'."\n";
 		$fld_cfg_rss .= $submit_box;
@@ -136,6 +169,6 @@ echo '<div id="page">'."\n";
 
 afficher_form_prefs($erreurs_form);
 
-echo "\n".'<script src="style/javascript.js" type="text/javascript"></script>'."\n";
+echo "\n".'<script src="style/scripts/javascript.js"></script>'."\n";
 
 footer($begin);

@@ -10,7 +10,7 @@ This is C-LX RSS Reader, a SQLite based RSS aggregator, by Timo van Neerden, sin
 
 ## Features
 
-C-LX RSS is juste another, single user, web-based, RSS Reader. It comes with OPML and CronJobs support.
+C-LX RSS is another single user, web-based RSS Reader. It comes with OPML and CronJobs support.
 
 ---
 
@@ -35,11 +35,13 @@ C-LX RSS is juste another, single user, web-based, RSS Reader. It comes with OPM
 
 ## Legal Notice.
 
-C-LX RSS is based on parts of BlogoText 3 (under MIT Licence), by Timo van Neerden, itself based on BlogoText, by Fred Nassar.
-
-Fred N. created BlogoText back in 2006. The script has been taken over by Timo V.N. in 2010 and until 2016.
-BlogoText has then been taken over by Mickaël Schoentgen & Community.
-
-C-LX RSS Reader has continued to evolve on it’s own.
+C-LX RSS is based on parts of [BlogoText 3](https://github.com/BlogoText/blogotext/tree/530284c34ab507be7c0f736b7ee2bb596cb123cf) (under MIT Licence), by Timo van Neerden, itself based on BlogoText, by Fred Nassar.
 
 C-LX RSS Reader is distributed under the MIT Licence.
+
+## Bugs? Ideas?
+
+You can submit bugs on Github.
+You can submit ideas too, but I do not guarantee that I will add any of them.
+
+I started this project to have a RSS reader that fits _my_ needs. If CLX-RSS doesn’t fit yours, I suggest you learn to code, fork this project and adapt it to make it do what _you_ want.
