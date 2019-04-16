@@ -16,6 +16,6 @@ echo '@charset "utf-8";'."\n";
 readfile('style-style.css');
 
 /* Custon UserCSS */
-if (is_file('../../../config/custom-styles.css')) {
-	readfile('../../../config/custom-styles.css');
+if (is_file('../../config/custom-styles.css')) {
+	readfile('../../config/custom-styles.css');
 }
